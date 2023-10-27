@@ -1,0 +1,16 @@
+{
+  "name": "guru-chatbot",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "cd web-app && npm run start",
+    "build": "python3 build.py",
+    "build.web": "python3 build.py --web",
+    "build.deploy": "python3 build.py --deploy",
+    "deploy.bootstrap": "cd deploy && npm install && npm run bootstrap",
+    "deploy": "cd deploy && npm run cdk deploy -- -c stack_name=\"${STACK_NAME:-}\" --all --require-approval never",
+    "destroy": "cd deploy && npm run cdk destroy -- -c stack_name=\"${STACK_NAME:-}\" --all --force"
+  },
+  "dependencies": {
+    "prop-types": "^15.8.1"
+  }
+}

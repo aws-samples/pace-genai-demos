@@ -1,0 +1,6 @@
+faiss-cpu
+langchain
+urllib3<2
+requests
+botocore
+boto3

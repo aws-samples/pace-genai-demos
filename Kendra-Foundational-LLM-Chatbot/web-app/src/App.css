@@ -1,0 +1,262 @@
+.app {
+  display: flex;
+  text-align: center;
+  flex: 1;
+  border-bottom: #282c34;
+  /* align self center */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  align-self: center;
+}
+
+.cs-message-list__scroll-wrapper {
+  /* overflow-y: scroll !important; */
+  position: absolute;
+  height: auto;
+  overscroll-behavior-y: auto;
+}
+.cs-message-list {
+  background-color: #fafafa;
+}
+
+.cs-message__content-wrapper {
+  text-align: left;
+}
+
+.cs-message__content {
+}
+
+.app-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  width: 900px;
+}
+.cs-main-container {
+  border: none;
+}
+.chat-container {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  width: 900px;
+  background-color: #fafafa;
+}
+.onboard-container {
+  overflow: auto;
+}
+
+.sync-run-container {
+  height: 400px;
+}
+
+
+.upload-files-container {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  width: 500px;
+  background-color: #fafafa;
+}
+
+.header {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.cs-chat-container .cs-message-input {
+  border-top: none;
+}
+.cs-message:not(:only-child) {
+  margin: 1em 0 0 0;
+}
+
+.cs-message-input {
+  background-color: transparent !important;
+}
+
+.cs-message-input__content-editor-container {
+  /* overflow: auto !important; */
+  align-items: start;
+}
+
+.cs-typing-indicator {
+  background-color: transparent !important;
+}
+
+.cs-message-input__content-editor-container > * {
+  align-items: start;
+  text-align: left;
+  flex: 1;
+  width: 100%;
+}
+
+.cs-message__content {
+  border-radius: 0.7em 0.7em 0.7em 0.7em !important;
+  background-color: #eee;
+}
+
+.cs-message--outgoing .cs-message__content {
+  /* margin-right: 10px; */
+  background-color: #c6e3fa;
+}
+
+.top-nav span {
+  overflow: visible !important;
+}
+
+.footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  font-size: 25px;
+}
+.app-header {
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.app-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.app {
+  display: flex;
+  text-align: center;
+  flex: 1;
+  border-bottom: #282c34;
+  /* align self center */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  align-self: center;
+}
+
+.cs-message-list__scroll-wrapper {
+  /* overflow-y: scroll !important; */
+  position: absolute;
+  height: auto;
+  overscroll-behavior-y: auto;
+}
+
+.cs-message__content-wrapper {
+  text-align: left;
+}
+
+.cs-message__content {
+}
+
+.app-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  width: 700px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .app-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.cs-message:not(:only-child) {
+  margin: 1em 0 0 0;
+}
+
+.cs-message-input__content-editor-container {
+  /* overflow: auto !important; */
+  align-items: start;
+}
+
+.cs-message-input__content-editor-container > * {
+  align-items: start;
+  text-align: left;
+  flex: 1;
+  width: 100%;
+}
+
+.cs-message__content {
+  border-radius: 0.7em 0.7em 0.7em 0.7em !important;
+  background-color: #eee;
+}
+
+.cs-message--outgoing .cs-message__content {
+  /* margin-right: 10px; */
+  background-color: #c6e3fa;
+}
+
+.footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  font-size: 25px;
+}
+.app-header {
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.app-link {
+  color: #61dafb;
+}
+
+.footer-logo {
+  float: left;
+  margin-left: 25px;
+  margin-bottom: 15px;
+  width: 180px;
+  min-width: 150px;
+}
+
+@media only screen and (max-width: 600px) {
+  .footer-logo {
+    min-width: 10px; /* adjust the value as needed */
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

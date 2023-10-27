@@ -1,0 +1,16 @@
+{
+  "name": "project-root",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "cd web-app && npm run start",
+    "build": "python3 build.py",
+    "build.api": "python3 build.py --api",
+    "build.web": "python3 build.py --web",
+    "build.deploy": "python3 build.py --deploy",
+    "deploy.bootstrap": "cd deploy && npm install && npm run bootstrap",
+    "deploy.cicd": "cd cicd && npm install && npm run cdk deploy -- --require-approval never",
+    "destroy.cicd": "cd cicd && npm install && npm run cdk destroy",
+    "deploy": "cd deploy && npm run cdk deploy -- -c stack_name=\"${STACK_NAME:-}\" --all --require-approval never",
+    "destroy": "cd deploy && npm run cdk destroy -- -c stack_name=\"${STACK_NAME:-}\" --all"  
+  }
+}

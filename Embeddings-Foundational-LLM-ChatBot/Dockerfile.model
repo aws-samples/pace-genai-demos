@@ -1,0 +1,18 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+FROM python:3.8
+USER root
+# Install the necessary libraries
+RUN pip install transformers torch sagemaker boto3
+
+RUN apt-get update && apt-get install -y git-lfs && git lfs install
+
+WORKDIR /app
+
+COPY create-model.sh /app/
+RUN chmod +x /app/create-model.sh
+
+RUN mkdir -p /app/e5-large-v1 && chmod 777 /app/e5-large-v1
+RUN mkdir -p /app/embedding_model && chmod 777 /app/embedding_model
+
+ENTRYPOINT ["/app/create-model.sh"]
