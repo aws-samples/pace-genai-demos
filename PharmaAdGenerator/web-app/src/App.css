@@ -1,56 +1,57 @@
 .app {
-    text-align: center;
+  text-align: center;
 }
 
 .app-logo {
-    height: 40vmin;
-    pointer-events: none;
+  height: 40vmin;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    .app-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+  .app-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
 }
-.awsui_progress-container_11huc_oobjs_273:not(#\9) {
-    max-width: none !important;
+
+.awsui_progress-container_11huc_106uy_272:not(#\9) {
+  max-width: none !important;
 }
 
 .app-header {
-    background-color: #282c34;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
 }
 
 .footer {
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-    font-size: 25px;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  font-size: 25px;
 }
 
 .footer-logo {
-    float: left;
-    margin-left: 25px;
-    margin-bottom: 15px;
-    width: 180px;
-    min-width: 150px;
+  float: left;
+  margin-left: 25px;
+  margin-bottom: 15px;
+  width: 180px;
+  min-width: 150px;
 }
 
 .app-link {
-    color: #61dafb;
+  color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

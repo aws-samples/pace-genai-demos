@@ -1,12 +1,22 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
 
-import { useState, useEffect } from "react";
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the "Software"), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 import TopNav from "@cloudscape-design/components/top-navigation";
-import { applyMode, Mode } from "@cloudscape-design/global-styles";
+import { Mode, applyMode } from "@cloudscape-design/global-styles";
 import { Auth } from "aws-amplify";
-import { API, Storage } from "aws-amplify";
-import * as React from "react";
+import { useEffect, useState } from "react";
 
 const i18nStrings = {};
 
@@ -76,13 +86,11 @@ export function TopBarNavigation() {
 
   return (
     <TopNav
-      className="top-nav"
       i18nStrings={i18nStrings}
       identity={{
         href: "/",
         title: "Guru Pharma",
         logo: {
-          src: "Guru_Pharma.svg",
           alt: "Guru Pharma",
         },
       }}
@@ -90,8 +98,6 @@ export function TopBarNavigation() {
         {
           type: "button",
           variant: "primary",
-          iconUrl:
-            "https://upload.wikimedia.org/wikipedia/commons/e/e6/Upload.svg",
           text: "   Upload Document",
           title: "   Upload Document",
           href: "/upload",
@@ -101,9 +107,6 @@ export function TopBarNavigation() {
           type: "button",
           variant: "primary",
           onClick: () => setDarkLightTheme(),
-          iconUrl: darkMode
-            ? "https://upload.wikimedia.org/wikipedia/commons/0/08/Weather_icon_-_sunny.svg"
-            : "https://upload.wikimedia.org/wikipedia/commons/7/72/Gnome-weather-clear-night.svg",
           text: darkMode ? "   Light Mode" : "   Dark Mode",
           title: darkMode ? "   Light Mode" : "   Dark Mode",
         },
@@ -112,16 +115,13 @@ export function TopBarNavigation() {
           type: "menu-dropdown",
           text: user,
           description: user,
-          iconUrl:
-            "https://upload.wikimedia.org/wikipedia/commons/c/ce/User-info.svg",
+
           onItemClick: (e) => onItemClickEvent(e),
           items: [
             {
               id: "signout",
               type: "button",
               variant: "primary",
-              iconUrl:
-                "https://upload.wikimedia.org/wikipedia/en/8/8c/Shutdown_button.svg",
               text: "Sign Out",
               title: "Sign Out",
             },

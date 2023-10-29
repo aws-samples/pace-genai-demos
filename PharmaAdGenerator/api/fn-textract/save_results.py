@@ -1,5 +1,17 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import boto3
 from datetime import datetime
@@ -142,65 +154,3 @@ if __name__ == "__main__":
     example_event = {}
     response = lambda_handler(example_event, {})
     print(json.dumps(response))
-
-
-
-
-# def save_response(aggregated_texts, s3_document_location):
-#     ddb_table = os.environ.get("DDB_TABLE_NAME")
-#     logger.info("Saving aggregated response to DDB")
-#     logger.info(f"DDB location {s3_document_location}")
-#     logger.info(f"DDB table {ddb_table}")
-#     logger.info(f"Aggregated texts {aggregated_texts}")
-
-#     ddb_id = "/".join(s3_document_location["S3ObjectName"].split("/")[1:])
-    
-#     # Convert the list of aggregated texts to a single string
-#     new_response = "".join(aggregated_texts)
-#     new_status = "Completed"
-#     item_key = {"id": {"S": ddb_id}}
-
-#     ddb_client.update_item(
-#         TableName=ddb_table, 
-#         Key=item_key,
-#         UpdateExpression='SET document_status = :document_status, textract_response = :textract_response',
-#         ExpressionAttributeValues={
-#             ':document_status': {"S": new_status},
-#             ':textract_response': {"S": new_response}
-#         }
-#     )
-
-# def lambda_handler(event, context):
-#     logger.info(mask_sensitive_data(event))
-#     aggregated_texts = []  # List to store aggregated texts
-
-#     try:
-#         records = event.get("Records", [])
-#         for record in records:
-#             if "Sns" in record:
-#                 message = json.loads(record["Sns"]["Message"])
-#                 logger.info(message)
-#                 textract_job_id = message.get("JobId")
-#                 logger.info(f"Textract job id {textract_job_id}")
-#                 s3_document_location = message.get("DocumentLocation")
-#                 logger.info(f"S3 object bucket {s3_document_location}")
-#                 if textract_job_id:
-#                     response = textract_client.get_document_text_detection(
-#                         JobId=textract_job_id
-#                     )
-#                     # Assuming get_line_columns() returns a list
-#                     aggregated_texts.extend(get_line_columns(response))
-
-#                     while 'NextToken' in response:
-#                         response = textract_client.get_document_text_detection(
-#                             JobId=textract_job_id,
-#                             NextToken=response['NextToken']
-#                         )
-#                         aggregated_texts.extend(get_line_columns(response))
-
-#         # After processing all pages, save the aggregated results
-#         if aggregated_texts:
-#             save_response(aggregated_texts, s3_document_location)
-
-#     except Exception as ex:
-#         logger.error(traceback.format_exc())
