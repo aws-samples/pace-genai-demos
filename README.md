@@ -21,11 +21,7 @@ These demos can be seamlessly deployed in your AWS account, offering foundationa
 
 You can deploy these demo's independent of each other. Please refer to the Readme files in each of the folders for deployment instructions.
 
-Refer to the blog post for details on how these solutions work.
-
-## ⚠️ Precautions ⚠️
-
-Before you begin using the solution, there are certain precautions you must take into account:
+Refer to the blog post for details on how these solutions work. Before you begin using the solution, there are certain precautions you must take into account:
 
 - **Licensing obligations**: If you choose to use any datasets or models alongside the provided samples, ensure you check the LLM code and comply with all licensing obligations attached to them.
 
@@ -33,22 +29,14 @@ Before you begin using the solution, there are certain precautions you must take
 
 ## Authors
 
-- [Jin Tan Ruan](https://www.linkedin.com/in/ztanruan)
-- [Aravind Kodandaramaiah](https://www.linkedin.com/in/aravindkoda)
+- [Jin Tan Ruan - Prototyping Developer](https://www.linkedin.com/in/ztanruan)
+- [Aravind Kodandaramaiah - Senior Prototyping Developer](https://www.linkedin.com/in/aravindkoda)
 
 ## Credits
 
 This sample was made possible thanks to the following libraries:
 
 - [langchain](https://python.langchain.com/docs/get_started/introduction.html) from [LangChain AI](https://github.com/langchain-ai)
-
-## Troubleshooting
-
-### Docker issues
-
-Build fails during a docker step due to `OSError: [Errno 28] No space left on device:` or something similar.
-Open docker desktop, click on `Images`, click on `Clean up`, check `Unused` and `Dangling`, then click `Remove`.  
-or run from the command line: `docker image prune -a`
 
 ## License
 
