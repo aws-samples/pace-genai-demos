@@ -21,22 +21,12 @@ These demos can be seamlessly deployed in your AWS account, offering foundationa
 
 You can deploy these demo's independent of each other. Please refer to the Readme files in each of the folders for deployment instructions.
 
-Refer to the blog post for details on how these solutions work. Before you begin using the solution, there are certain precautions you must take into account:
-
-- **Licensing obligations**: If you choose to use any datasets or models alongside the provided samples, ensure you check the LLM code and comply with all licensing obligations attached to them.
-
-- **This is a sample**: the code provided in this repository shouldn't be used for production workloads without further reviews and adaptation.
+Refer to the-[blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the-power-of-enterprise-data-with-generative-ai-Insights-from-amazon-kendra-langchain-and-large-language-models/) post for details on how these solutions work.
 
 ## Authors
 
-- [Jin Tan Ruan - Prototyping Developer](https://www.linkedin.com/in/ztanruan)
-- [Aravind Kodandaramaiah - Senior Prototyping Developer](https://www.linkedin.com/in/aravindkoda)
-
-## Credits
-
-This sample was made possible thanks to the following libraries:
-
-- [langchain](https://python.langchain.com/docs/get_started/introduction.html) from [LangChain AI](https://github.com/langchain-ai)
+- [Jin Tan Ruan - AWSI PACE Prototyping Developer](https://www.linkedin.com/in/ztanruan)
+- [Aravind Kodandaramaiah - AWSI PACE Senior Prototyping Developer](https://www.linkedin.com/in/aravindkoda)
 
 ## License
 
