@@ -91,6 +91,7 @@ export function TopBarNavigation() {
         href: "/",
         title: "Guru Pharma",
         logo: {
+          src: "guru_pharma.svg",
           alt: "Guru Pharma",
         },
       }}
