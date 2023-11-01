@@ -1,4 +1,4 @@
-# Generative AI demos using Amazon Kendra,LangChain and large language models using enterprise data
+# Harnessing the power of enterprise data with generative AI: Insights from Amazon Kendra, LangChain, and large language models
 
 This repository provides code samples for three Generative AI demos, licensed under MIT-0 license.
 
@@ -21,7 +21,7 @@ These demos can be seamlessly deployed in your AWS account, offering foundationa
 
 You can deploy these demo's independent of each other. Please refer to the Readme files in each of the folders for deployment instructions.
 
-Refer to the-[blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the-power-of-enterprise-data-with-generative-ai-Insights-from-amazon-kendra-langchain-and-large-language-models/) post for details on how these solutions work.
+Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the-power-of-enterprise-data-with-generative-ai-Insights-from-amazon-kendra-langchain-and-large-language-models/) post for details on how these solutions work.
 
 ## Authors
 
