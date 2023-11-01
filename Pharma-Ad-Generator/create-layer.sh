@@ -22,5 +22,5 @@ if [ ! -d "$directory" ]; then
 fi
 
 docker build --no-cache . -t bedrock-layer-builder:latest
-container_id=$(docker run --platform linux/amd64 -t -d bedrock-layer-builder /bin/bash)
+container_id=$(docker run -t -d bedrock-layer-builder /bin/bash)
 docker cp $container_id:/tmp/layer/python-bedrock-layer.zip ./lambda-layer

@@ -101,12 +101,14 @@ export function TopBarNavigation() {
           variant: "primary",
           text: "   Upload Document",
           title: "   Upload Document",
+          iconName: "folder-open",
           href: "/upload",
         },
 
         {
           type: "button",
           variant: "primary",
+          iconName: "multiscreen",
           onClick: () => setDarkLightTheme(),
           text: darkMode ? "   Light Mode" : "   Dark Mode",
           title: darkMode ? "   Light Mode" : "   Dark Mode",
@@ -116,7 +118,7 @@ export function TopBarNavigation() {
           type: "menu-dropdown",
           text: user,
           description: user,
-
+          iconName: "user-profile",
           onItemClick: (e) => onItemClickEvent(e),
           items: [
             {

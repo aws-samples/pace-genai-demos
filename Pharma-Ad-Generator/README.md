@@ -14,7 +14,7 @@ This demo supports the following Amazon Bedrock foundational base LLM Models.
 
 # Architecture
 
-![Architecture](assets/KendraBedrockRAG.png)
+![Pharma Ad Architecture](./images/architecture.png)
 
 ## Prerequisites
 
@@ -51,8 +51,16 @@ After the deployment is successful, follow these steps to get started on using t
 
 3. After logging in, select **Upload Assets**. Click **Choose files** to select documents or images. Click on **Upload** to transfer them into S3.
 
+![Pharma Ad Upload File](./images/upload.png)
+
 4. Monitor job progress by clicking the refresh button. Once the status reads **COMPLETED**, go to the main page. From there, select the document and image to craft a new advertisement.
+
+![Pharma Ad Upload Progress](./images/upload_progress.png)
 
 5. In the **Ad configuration**, adjust location, style, temperature, FDA ad guidelines, step count, image intensity, image generation model, and text generation model. Then, click **Generate Advertisement**.
 
+![Pharma Ad configuration](./images/configuration.png)
+
 6. Press **Generate Description** for a new ad description. To generate a new image from the source, click **Generate Image**.
+
+![Pharma Ad configuration](./images/results.png)

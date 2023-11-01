@@ -216,7 +216,13 @@ export function Upload() {
       }
     >
       <SpaceBetween size="xxl">
-        <Container header={<Header variant="h2">Upload Document</Header>}>
+        <Container
+          header={
+            <Header variant="h2" iconName="download">
+              Upload Document
+            </Header>
+          }
+        >
           <SpaceBetween size="xl">
             <TextContent>
               Upload pdfs & images into S3 for ad content generation pipeline.
@@ -244,6 +250,7 @@ export function Upload() {
                 limitShowMore: "Show more files",
                 errorIconAriaLabel: "Error",
               }}
+              multiple
               showFileLastModified
               showFileSize
               showFileThumbnail

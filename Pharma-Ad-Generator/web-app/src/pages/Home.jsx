@@ -883,11 +883,14 @@ export function HomeView() {
           variant="h2"
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              <Button onClick={allFieldsReset}>Reset</Button>
+              <Button onClick={allFieldsReset} iconName="redo">
+                Reset
+              </Button>
               <Button
                 disabled={buttonDisabled}
                 variant="primary"
                 onClick={handleTextGenerationButtonClick}
+                iconName="insert-row"
               >
                 Generate Description
               </Button>
@@ -895,6 +898,7 @@ export function HomeView() {
                 disabled={buttonDisabled}
                 variant="primary"
                 onClick={handleImageGenerationButtonClick}
+                iconName="copy"
               >
                 Generate Image
               </Button>
@@ -902,6 +906,7 @@ export function HomeView() {
                 disabled={buttonDisabled}
                 variant="primary"
                 onClick={handleSubmitButtonClick}
+                iconName="file"
               >
                 Generate Advertisement
               </Button>
