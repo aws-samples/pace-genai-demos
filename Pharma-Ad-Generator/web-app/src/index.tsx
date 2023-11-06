@@ -13,6 +13,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       Main Index
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import { Amplify, Auth } from "aws-amplify";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -41,7 +54,7 @@ fetch(`${basePath}/api/amplify-config`).then(async (response) => {
       endpoints: [
         {
           name: "api",
-          endpoint: basePath,
+          endpoint: amplifyConfig.apiUrl,
           region: amplifyConfig.region,
           custom_header: async () => {
             return {
@@ -53,7 +66,7 @@ fetch(`${basePath}/api/amplify-config`).then(async (response) => {
         },
         {
           name: "generateContentAPI",
-          endpoint: process.env.REACT_APP_LAMBDA_URL,
+          endpoint: amplifyConfig.contentUrl,
           service: "lambda",
           region: amplifyConfig.region,
         },
@@ -61,7 +74,7 @@ fetch(`${basePath}/api/amplify-config`).then(async (response) => {
     },
     Storage: {
       AWSS3: {
-        bucket: process.env.REACT_APP_UPLOAD_S3_BUCKET,
+        bucket: amplifyConfig.documentInputBucketName,
         region: amplifyConfig.region,
       },
     },

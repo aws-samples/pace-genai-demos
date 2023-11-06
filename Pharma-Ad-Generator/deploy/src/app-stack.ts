@@ -13,9 +13,20 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       CDK Resources
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
-import { WebSocketIamAuthorizer } from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
-import * as apigwv2_int from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
 import * as lambdaPython from "@aws-cdk/aws-lambda-python-alpha";
 import * as cdk from "aws-cdk-lib";
 import { RemovalPolicy } from "aws-cdk-lib";
@@ -30,7 +41,6 @@ import {
 import * as eventsources from "aws-cdk-lib/aws-lambda-event-sources";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { BlockPublicAccess } from "aws-cdk-lib/aws-s3";
-import * as ssm from "aws-cdk-lib/aws-ssm";
 import { Construct } from "constructs";
 import { AmplifyConfigLambdaConstruct } from "./constructs/amplify-config-lambda-construct";
 import { ApiGatewayV2CloudFrontConstruct } from "./constructs/apigatewayv2-cloudfront-construct";
@@ -38,11 +48,13 @@ import { ApiGatewayV2LambdaConstruct } from "./constructs/apigatewayv2-lambda-co
 import { CloudFrontS3WebSiteConstruct } from "./constructs/cloudfront-s3-website-construct";
 import { CognitoWebNativeConstruct } from "./constructs/cognito-web-native-construct";
 import { SsmParameterReaderConstruct } from "./constructs/ssm-parameter-reader-construct";
-import { NagSuppressions } from "cdk-nag";
+
 export interface AppStackProps extends cdk.StackProps {
   readonly ssmWafArnParameterName: string;
   readonly ssmWafArnParameterRegion: string;
+  readonly resourcePrefix: string;
 }
+
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
@@ -51,9 +63,9 @@ export class AppStack extends cdk.Stack {
     const awsAccountId = cdk.Stack.of(this).account;
     const awsRegion = cdk.Stack.of(this).region;
 
-    const documentInputLibraryBucket = new s3.Bucket(
+    const documentInputBucket = new s3.Bucket(
       this,
-      "GuruPharmaAdEnvInputDocumentLibraryBucket",
+      props.resourcePrefix + "documentLibraryBucket",
       {
         versioned: false,
         encryption: s3.BucketEncryption.S3_MANAGED,
@@ -65,7 +77,7 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    documentInputLibraryBucket.addCorsRule({
+    documentInputBucket.addCorsRule({
       allowedOrigins: ["*"],
       allowedMethods: [
         s3.HttpMethods.GET,
@@ -79,15 +91,10 @@ export class AppStack extends cdk.Stack {
       maxAge: 3000,
     });
 
-    new cdk.CfnOutput(this, "GuruPharmaAdEnvDocumentInputS3Bucket", {
-      value: documentInputLibraryBucket.bucketName,
-    });
-
     const cognito = new CognitoWebNativeConstruct(this, "Cognito", {
-      documentInputLibraryBucketArn: documentInputLibraryBucket.bucketArn,
+      documentInputLibraryBucketArn: documentInputBucket.bucketArn,
     });
-
-    documentInputLibraryBucket.grantReadWrite(cognito.authenticatedRole);
+    documentInputBucket.grantReadWrite(cognito.authenticatedRole);
 
     const cfWafWebAcl = new SsmParameterReaderConstruct(
       this,
@@ -98,7 +105,7 @@ export class AppStack extends cdk.Stack {
       }
     ).getValue();
 
-    documentInputLibraryBucket.grantReadWrite(cognito.authenticatedRole);
+    documentInputBucket.grantReadWrite(cognito.authenticatedRole);
 
     const website = new CloudFrontS3WebSiteConstruct(this, "WebApp", {
       webSiteBuildPath: webAppBuildPath,
@@ -111,9 +118,9 @@ export class AppStack extends cdk.Stack {
       userPoolClient: cognito.webClientUserPool,
     });
 
-    const imageOutputLibraryBucket = new s3.Bucket(
+    const imageOutputBucket = new s3.Bucket(
       this,
-      "GuruPharmaAdEnvImageOutputLibraryBucket",
+      props.resourcePrefix + "imageOutputBucket",
       {
         versioned: false,
         encryption: s3.BucketEncryption.S3_MANAGED,
@@ -125,9 +132,9 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    const referenceSpecifications = new dynamodb.Table(
+    const referenceSpecificationsTable = new dynamodb.Table(
       this,
-      "GuruPharmaAdEnvReferenceSpecificationsTable",
+      props.resourcePrefix + "referenceSpecificationsTable",
       {
         billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
         partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
@@ -136,24 +143,15 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    const documentTableName = new ssm.StringParameter(
-      this,
-      "GuruPharmaAdEnvReferenceSpecificationsTableName",
-      {
-        parameterName: "/public/referenceSpecifications",
-        stringValue: referenceSpecifications.tableName,
-      }
-    );
-
     const textractExtractTopicKey = new cdk.aws_kms.Key(
       this,
-      `GuruPharmaAdEnvTextractExtractTopicKey`,
+      props.resourcePrefix + "textractExtractTopicKey",
       { enableKeyRotation: true }
     );
 
     const textractExtractSNSTopic = new cdk.aws_sns.Topic(
       this,
-      "GuruPharmaAdEnvTextractExtractSNSTopic",
+      props.resourcePrefix + "textractExtractSNSTopic",
       {
         topicName: `textractExtractSNSTopic-${cdk.Stack.of(this).stackName}`,
         masterKey: textractExtractTopicKey,
@@ -162,11 +160,12 @@ export class AppStack extends cdk.Stack {
 
     const textractExtractTextractRole = new iam.Role(
       this,
-      "GuruPharmaAdEnvTextractExtractTextractRole",
+      props.resourcePrefix + "textractExtractTextractRole",
       {
         assumedBy: new iam.ServicePrincipal("textract.amazonaws.com"),
       }
     );
+
     textractExtractSNSTopic.grantPublish(textractExtractTextractRole);
     textractExtractTextractRole.addToPolicy(
       new iam.PolicyStatement({
@@ -176,24 +175,24 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    const textractExtractFn = new lambdaPython.PythonFunction(
+    const textractExtractHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruPharmaAdEnvTextractExtractFn",
+      props.resourcePrefix + "textractExtractHandlerFn",
       {
         runtime: cdk.aws_lambda.Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "trigger_extraction.py",
-        entry: "../api/fn-textract",
+        entry: "../api/text-textract",
         timeout: cdk.Duration.minutes(5),
         environment: {
-          DDB_TABLE_NAME: referenceSpecifications.tableName,
+          DDB_TABLE_NAME: referenceSpecificationsTable.tableName,
           SNS_TOPIC_ARN: textractExtractSNSTopic.topicArn,
           SNS_ROLE_ARN: textractExtractTextractRole.roleArn,
         },
       }
     );
 
-    textractExtractFn.addToRolePolicy(
+    textractExtractHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -206,7 +205,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    textractExtractFn.addToRolePolicy(
+    textractExtractHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -219,7 +218,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    textractExtractFn.addToRolePolicy(
+    textractExtractHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -231,45 +230,45 @@ export class AppStack extends cdk.Stack {
           "dynamodb:PutItem",
         ],
         resources: [
-          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecifications.tableName}`,
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecificationsTable.tableName}`,
         ],
       })
     );
 
-    documentInputLibraryBucket.grantRead(textractExtractFn);
+    documentInputBucket.grantRead(textractExtractHandlerFn);
 
-    documentInputLibraryBucket.addEventNotification(
+    documentInputBucket.addEventNotification(
       cdk.aws_s3.EventType.OBJECT_CREATED_PUT,
-      new cdk.aws_s3_notifications.LambdaDestination(textractExtractFn),
+      new cdk.aws_s3_notifications.LambdaDestination(textractExtractHandlerFn),
       {
         prefix: "public/reference-specifications/",
       }
     );
 
-    documentInputLibraryBucket.addEventNotification(
+    documentInputBucket.addEventNotification(
       cdk.aws_s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
-      new cdk.aws_s3_notifications.LambdaDestination(textractExtractFn),
+      new cdk.aws_s3_notifications.LambdaDestination(textractExtractHandlerFn),
       {
         prefix: "public/reference-specifications/",
       }
     );
 
-    const textractSaveResultsFn = new lambdaPython.PythonFunction(
+    const textractSaveResultsHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruPharmaAdEnvTextractSaveResultsFn",
+      props.resourcePrefix + "textractSaveResultsHandlerFn",
       {
         runtime: cdk.aws_lambda.Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "save_results.py",
-        entry: "../api/fn-textract",
+        entry: "../api/text-textract",
         timeout: cdk.Duration.minutes(5),
         environment: {
-          DDB_TABLE_NAME: referenceSpecifications.tableName,
+          DDB_TABLE_NAME: referenceSpecificationsTable.tableName,
         },
       }
     );
-    referenceSpecifications.grantFullAccess(textractSaveResultsFn);
-    textractSaveResultsFn.addToRolePolicy(
+    referenceSpecificationsTable.grantFullAccess(textractSaveResultsHandlerFn);
+    textractSaveResultsHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -283,7 +282,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    textractSaveResultsFn.addToRolePolicy(
+    textractSaveResultsHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -295,16 +294,16 @@ export class AppStack extends cdk.Stack {
         ],
 
         resources: [
-          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecifications.tableName}`,
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecificationsTable.tableName}`,
         ],
       })
     );
 
-    textractSaveResultsFn.addEventSource(
+    textractSaveResultsHandlerFn.addEventSource(
       new eventsources.SnsEventSource(textractExtractSNSTopic)
     );
 
-    textractSaveResultsFn.addToRolePolicy(
+    textractSaveResultsHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -316,49 +315,70 @@ export class AppStack extends cdk.Stack {
           "dynamodb:PutItem",
         ],
         resources: [
-          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecifications.tableName}`,
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecificationsTable.tableName}`,
         ],
       })
     );
 
-    const listSpecificationsFn = new lambdaPython.PythonFunction(
+    const listSpecificationsHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruPharmaAdEnvListSpecificationFn",
+      props.resourcePrefix + "listSpecificationHandlerFn",
       {
         runtime: cdk.aws_lambda.Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "list_specifications.py",
-        entry: "../api/fn-list-specification",
+        entry: "../api/list-specification",
         timeout: cdk.Duration.minutes(5),
         environment: {
-          DDB_TABLE_NAME: referenceSpecifications.tableName,
+          DDB_TABLE_NAME: referenceSpecificationsTable.tableName,
         },
       }
     );
 
-    referenceSpecifications.grantReadData(listSpecificationsFn);
+    referenceSpecificationsTable.grantReadData(listSpecificationsHandlerFn);
 
     new ApiGatewayV2LambdaConstruct(
       this,
-      "GuruPharmaAdEnvListSpecificationsApiGateway",
+      props.resourcePrefix + "listSpecificationsApiGateway",
       {
-        lambdaFn: listSpecificationsFn,
+        lambdaFn: listSpecificationsHandlerFn,
         routePath: "/api/assets/specifications",
         methods: [apigwv2.HttpMethod.GET],
         api: api.apiGatewayV2,
       }
     );
 
-    const modelLambdaFunctionHandlerRole = new cdk.aws_iam.Role(
+    const bedrockLayer = new LayerVersion(
       this,
-      "GuruPharmaAdEnvModelLambdaFunctionHandlerRole",
+      props.resourcePrefix + "bedrockLayer",
       {
-        description: "Role Model Lambda function",
-        assumedBy: new cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
+        compatibleRuntimes: [Runtime.PYTHON_3_10],
+        compatibleArchitectures: [Architecture.ARM_64],
+        code: Code.fromAsset("../lambda-layer/python-bedrock-layer.zip"),
       }
     );
 
-    modelLambdaFunctionHandlerRole.addToPolicy(
+    const contentGenerationHandlerFn = new lambdaPython.PythonFunction(
+      this,
+      props.resourcePrefix + "contentGenerationHandlerFn",
+      {
+        runtime: cdk.aws_lambda.Runtime.PYTHON_3_10,
+        handler: "lambda_handler",
+        index: "lambda_function.py",
+        entry: "../api/content-generation",
+        timeout: cdk.Duration.minutes(15),
+        memorySize: 3096,
+        architecture: Architecture.ARM_64,
+        layers: [bedrockLayer],
+        environment: {
+          DYNAMO_DB_TABLE_NAME: referenceSpecificationsTable.tableName,
+          S3_INPUT_ASSETS_BUCKET_NAME: documentInputBucket.bucketName,
+          S3_OUTPUT_ASSETS_BUCKET_NAME: imageOutputBucket.bucketName,
+        },
+      }
+    );
+
+    contentGenerationHandlerFn.addToRolePolicy(
       new cdk.aws_iam.PolicyStatement({
         actions: [
           "dynamodb:Scan",
@@ -375,80 +395,52 @@ export class AppStack extends cdk.Stack {
           "lambda:InvokeFunction",
         ],
         resources: [
-          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecifications.tableName}`,
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${referenceSpecificationsTable.tableName}`,
           `arn:aws:bedrock:${awsRegion}::foundation-model/*`,
-          `arn:aws:s3:::${documentInputLibraryBucket.bucketName}/*`,
-          `arn:aws:s3:::${imageOutputLibraryBucket.bucketName}/*`,
+          `arn:aws:s3:::${documentInputBucket.bucketName}/*`,
+          `arn:aws:s3:::${imageOutputBucket.bucketName}/*`,
           `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
         ],
       })
     );
 
-    const bedrockLambdaLayer = new LayerVersion(this, "bedrockLayer", {
-      compatibleRuntimes: [Runtime.PYTHON_3_10],
-      compatibleArchitectures: [Architecture.ARM_64],
-      code: Code.fromAsset("../lambda-layer/python-bedrock-layer.zip"),
-    });
-
-    const contentGenerationFn = new lambdaPython.PythonFunction(
-      this,
-      "GuruPharmaAdEnvContentGenerationFn",
-      {
-        runtime: cdk.aws_lambda.Runtime.PYTHON_3_10,
-        handler: "lambda_handler",
-        index: "lambda_function.py",
-        entry: "../api/fn-content-generation",
-        timeout: cdk.Duration.minutes(15),
-        memorySize: 3096,
-        role: modelLambdaFunctionHandlerRole,
-        architecture: Architecture.ARM_64,
-        layers: [bedrockLambdaLayer],
-        environment: {
-          DYNAMO_DB_TABLE_NAME: referenceSpecifications.tableName,
-          S3_INPUT_ASSETS_BUCKET_NAME: documentInputLibraryBucket.bucketName,
-          S3_OUTPUT_ASSETS_BUCKET_NAME: imageOutputLibraryBucket.bucketName,
-        },
-      }
-    );
-
-    contentGenerationFn.addPermission("PermissionForAnotherAccount", {
+    contentGenerationHandlerFn.addPermission("PermissionForAnotherAccount", {
       principal: cognito.authenticatedRole,
       action: "lambda:InvokeFunctionUrl",
     });
 
-    const contentGenerationLambdaUrl = contentGenerationFn.addFunctionUrl({
-      authType: cdk.aws_lambda.FunctionUrlAuthType.AWS_IAM,
-      cors: {
-        allowedOrigins: ["*"],
-        allowedMethods: [
-          cdk.aws_lambda.HttpMethod.GET,
-          cdk.aws_lambda.HttpMethod.POST,
-        ],
-        allowCredentials: false,
-        maxAge: cdk.Duration.minutes(10),
-        exposedHeaders: ["access-control-allow-origin"],
-        allowedHeaders: [
-          "authorization",
-          "content-type",
-          "origin",
-          "x-amz-date",
-          "x-api-key",
-          "x-amz-security-token",
-          "x-amz-user-agent",
-        ],
-      },
-    });
-
-    new cdk.CfnOutput(this, "GuruPharmaAdEnvGenerationLambdaUrl", {
-      description: "LambdaFn Url",
-      value: contentGenerationLambdaUrl.url,
-    });
+    const contentGenerationLambdaUrl =
+      contentGenerationHandlerFn.addFunctionUrl({
+        authType: cdk.aws_lambda.FunctionUrlAuthType.AWS_IAM,
+        cors: {
+          allowedOrigins: ["*"],
+          allowedMethods: [
+            cdk.aws_lambda.HttpMethod.GET,
+            cdk.aws_lambda.HttpMethod.POST,
+          ],
+          allowCredentials: false,
+          maxAge: cdk.Duration.minutes(10),
+          exposedHeaders: ["access-control-allow-origin"],
+          allowedHeaders: [
+            "authorization",
+            "content-type",
+            "origin",
+            "x-amz-date",
+            "x-api-key",
+            "x-amz-security-token",
+            "x-amz-user-agent",
+          ],
+        },
+      });
 
     new AmplifyConfigLambdaConstruct(this, "AmplifyConfigFn", {
       api: api.apiGatewayV2,
       appClientId: cognito.webClientId,
       identityPoolId: cognito.identityPoolId,
       userPoolId: cognito.userPoolId,
+      documentInputBucketName: documentInputBucket.bucketName,
+      contentUrl: contentGenerationLambdaUrl.url,
+      apiUrl: api.apiGatewayV2.apiEndpoint,
     });
   }
 }

@@ -1,5 +1,13 @@
 # Foundation Models Pharma Ad Generator
 
+### Author: Jin Tan Ruan
+
+### Linkedin: https://www.linkedin.com/in/ztanruan
+
+### Date: 04/11/2023
+
+### Disclaimer: This code is provided "as is" in accordance with the repository license
+
 A specialized application tailored for the pharmaceutical industry. Harnessing the generative capabilities of foundational models, this tool creates convincing and compliant pharmaceutical advertisements, ensuring content adheres to industry standards and regulations.
 
 In the architectural layout, based on their selected model and ad preferences, customers are seamlessly guided to the Amazon Bedrock foundation models. This streamlined approach ensures that new ads are generated precisely according to the desired configuration. As part of the process, documents are efficiently handled by Amazon Textract, with the resultant text securely stored in DynamoDB. A standout feature is the modular design for image and text generation, granting customers the flexibility to independently regenerate any component as required.

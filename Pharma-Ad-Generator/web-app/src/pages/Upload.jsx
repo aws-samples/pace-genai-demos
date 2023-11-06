@@ -13,6 +13,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       Upload Component
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import { API } from "@aws-amplify/api";
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
@@ -41,9 +54,6 @@ export function Upload() {
   const [loading, setLoading] = useState(false);
   const [pdfs, setPdfs] = useState([]);
   const [images, setImages] = useState([]);
-
-  const [pdfsFilterText, setPdfsFilterText] = useState("");
-  const [imagesFilterText, setImagesFilterText] = useState("");
 
   const ITEMS_PER_PAGE = 10;
   const [pdfsCurrentPageIndex, setPdfsCurrentPageIndex] = useState(0);

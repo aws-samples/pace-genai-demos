@@ -14,6 +14,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# --
+# --  Author:        Jin Tan Ruan
+# --  Date:          04/11/2023
+# --  Purpose:       Executes and Deploys Bedrock Layer
+# --  Version:       0.1.0
+# --  Disclaimer:    This script is provided "as is" in accordance with the repository license
+# --  History
+# --  When        Version     Who         What
+# --  -----------------------------------------------------------------
+# --  04/11/2023  0.1.0       jtanruan    Initial
+# --  -----------------------------------------------------------------
+# --
+
 set -o pipefail # FAIL FAST
 shopt -s expand_aliases
 
@@ -34,24 +47,11 @@ echo "******************"
 chmod +x create-layer.sh
 source ./create-layer.sh
 
-touch ./web-app/.env
-
 # Run build
 npm install
 npm run build
 # Sometimes the build can take a while -- if credentials run out you can refresh them with this helper function
 npm run deploy.bootstrap
-npm run deploy
-
-# When Deployment is done lets get the Input Bucket name from the Outputs and Update the env file
-REACT_APP_UPLOAD_S3_BUCKET=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?contains(OutputKey, 'DocumentInputS3Bucket')].OutputValue" --output text)
-echo "REACT_APP_UPLOAD_S3_BUCKET=${REACT_APP_UPLOAD_S3_BUCKET}" >> ./web-app/.env
-
-LAMBDA_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='GuruPharmaAdEnvGenerationLambdaUrl'].OutputValue" --output text)
-echo "REACT_APP_LAMBDA_URL=${LAMBDA_URL}" >> ./web-app/.env
-
-# lets run a deployment again for the .env file change to be repackaged and deployed
-npm run build
 npm run deploy
 
 echo "Deployment complete."

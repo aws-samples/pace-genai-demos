@@ -13,23 +13,36 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       SSM parameter Construct
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export interface SsmParameterReaderConstructProps extends cdk.StackProps {
-    readonly ssmParameterName: string;
-    readonly ssmParameterRegion: string;
-    /**
-     * Sets the physical resource id to current date to force a pull of the parameter on subsequent
-     * deploys
-     *
-     * @default false
-     */
-    readonly pullEveryTime?: boolean;
+  readonly ssmParameterName: string;
+  readonly ssmParameterRegion: string;
+  /**
+   * Sets the physical resource id to current date to force a pull of the parameter on subsequent
+   * deploys
+   *
+   * @default false
+   */
+  readonly pullEveryTime?: boolean;
 }
 
 const defaultProps: Partial<SsmParameterReaderConstructProps> = {
-    pullEveryTime: false,
+  pullEveryTime: false,
 };
 
 /**
@@ -39,39 +52,48 @@ const defaultProps: Partial<SsmParameterReaderConstructProps> = {
  *
  */
 export class SsmParameterReaderConstruct extends Construct {
-    public ssmParameter: cdk.custom_resources.AwsCustomResource;
+  public ssmParameter: cdk.custom_resources.AwsCustomResource;
 
-    constructor(parent: Construct, name: string, props: SsmParameterReaderConstructProps) {
-        super(parent, name);
+  constructor(
+    parent: Construct,
+    name: string,
+    props: SsmParameterReaderConstructProps
+  ) {
+    super(parent, name);
 
-        props = { ...defaultProps, ...props };
+    props = { ...defaultProps, ...props };
 
-        const stack = cdk.Stack.of(this);
+    const stack = cdk.Stack.of(this);
 
-        const physicalResourceId = props.pullEveryTime
-            ? Date.UTC.toString()
-            : `${props.ssmParameterName}-${props.ssmParameterRegion}`;
+    const physicalResourceId = props.pullEveryTime
+      ? Date.UTC.toString()
+      : `${props.ssmParameterName}-${props.ssmParameterRegion}`;
 
-        this.ssmParameter = new cdk.custom_resources.AwsCustomResource(this, "Param", {
-            onUpdate: {
-                service: "SSM",
-                action: "getParameter",
-                parameters: { Name: `${props.ssmParameterName}` },
-                region: props.ssmParameterRegion,
-                physicalResourceId: cdk.custom_resources.PhysicalResourceId.of(physicalResourceId),
-            },
-            policy: cdk.custom_resources.AwsCustomResourcePolicy.fromSdkCalls({
-                resources: [
-                    `arn:aws:ssm:${props.ssmParameterRegion}:${stack.account}:parameter/${props.ssmParameterName}`,
-                ],
-            }),
-        });
-    }
+    this.ssmParameter = new cdk.custom_resources.AwsCustomResource(
+      this,
+      "Param",
+      {
+        onUpdate: {
+          service: "SSM",
+          action: "getParameter",
+          parameters: { Name: `${props.ssmParameterName}` },
+          region: props.ssmParameterRegion,
+          physicalResourceId:
+            cdk.custom_resources.PhysicalResourceId.of(physicalResourceId),
+        },
+        policy: cdk.custom_resources.AwsCustomResourcePolicy.fromSdkCalls({
+          resources: [
+            `arn:aws:ssm:${props.ssmParameterRegion}:${stack.account}:parameter/${props.ssmParameterName}`,
+          ],
+        }),
+      }
+    );
+  }
 
-    /**
-     * @returns string value of the parameter
-     */
-    public getValue() {
-        return this.ssmParameter.getResponseField("Parameter.Value");
-    }
+  /**
+   * @returns string value of the parameter
+   */
+  public getValue() {
+    return this.ssmParameter.getResponseField("Parameter.Value");
+  }
 }

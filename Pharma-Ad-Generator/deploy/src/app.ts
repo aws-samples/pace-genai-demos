@@ -13,6 +13,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       CDK Stack Configuration
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import * as cdk from "aws-cdk-lib";
 
 import { AwsSolutionsChecks } from "cdk-nag";
@@ -22,36 +35,37 @@ import { CfWafStack } from "./cf-waf-stack";
 
 const app = new cdk.App();
 
-const stackName = "guru-pharma-ad-studio";
+const stackName = "guru-pharma";
 const account =
-    app.node.tryGetContext("account") ||
-    process.env.CDK_DEPLOY_ACCOUNT ||
-    process.env.CDK_DEFAULT_ACCOUNT;
+  app.node.tryGetContext("account") ||
+  process.env.CDK_DEPLOY_ACCOUNT ||
+  process.env.CDK_DEFAULT_ACCOUNT;
 const region =
-    app.node.tryGetContext("region") ||
-    process.env.CDK_DEPLOY_REGION ||
-    process.env.CDK_DEFAULT_REGION;
+  app.node.tryGetContext("region") ||
+  process.env.CDK_DEPLOY_REGION ||
+  process.env.CDK_DEFAULT_REGION;
 
 // Deploy Waf for CloudFront in us-east-1
 const cfWafStackName = stackName + "-waf";
 
 const cfWafStack = new CfWafStack(app, cfWafStackName, {
-    env: {
-        account: account,
-        region: "us-east-1",
-    },
-    stackName: cfWafStackName,
+  env: {
+    account: account,
+    region: "us-east-1",
+  },
+  stackName: cfWafStackName,
 });
 
 // Deploy App Stack
 const appStack = new AppStack(app, stackName, {
-    env: {
-        account: account,
-        region: region,
-    },
-    stackName: stackName,
-    ssmWafArnParameterName: cfWafStack.ssmWafArnParameterName,
-    ssmWafArnParameterRegion: cfWafStack.region,
+  env: {
+    account: account,
+    region: region,
+  },
+  stackName: stackName,
+  ssmWafArnParameterName: cfWafStack.ssmWafArnParameterName,
+  ssmWafArnParameterRegion: cfWafStack.region,
+  resourcePrefix: "ad-studio",
 });
 
 appStack.addDependency(cfWafStack);

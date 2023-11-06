@@ -13,6 +13,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       WAF Construct
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
@@ -25,28 +38,28 @@ import { Construct } from "constructs";
  * @returns
  */
 export function attachWafV2ToLoadBalancer(
-    /**
-     * Parent construct to assign the association to.
-     */
-    parent: Construct,
+  /**
+   * Parent construct to assign the association to.
+   */
+  parent: Construct,
 
-    /**
-     * Name of the construct
-     */
-    name: string,
+  /**
+   * Name of the construct
+   */
+  name: string,
 
-    /**
-     * WafV2 WebAcl
-     */
-    webAcl: cdk.aws_wafv2.CfnWebACL,
+  /**
+   * WafV2 WebAcl
+   */
+  webAcl: cdk.aws_wafv2.CfnWebACL,
 
-    /**
-     * load balancer to attach the web acl to
-     */
-    loadBalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer,
+  /**
+   * load balancer to attach the web acl to
+   */
+  loadBalancer: cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer
 ) {
-    return new cdk.aws_wafv2.CfnWebACLAssociation(parent, name, {
-        webAclArn: webAcl.attrArn,
-        resourceArn: loadBalancer.loadBalancerArn,
-    });
+  return new cdk.aws_wafv2.CfnWebACLAssociation(parent, name, {
+    webAclArn: webAcl.attrArn,
+    resourceArn: loadBalancer.loadBalancerArn,
+  });
 }

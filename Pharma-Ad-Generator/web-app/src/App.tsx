@@ -13,6 +13,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       App Schema
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
@@ -22,19 +35,19 @@ import Homepage from "./pages/Index";
 import IndexUpload from "./pages/IndexUpload";
 
 function App() {
-    return (
-        <BrowserRouter>
-            <TopBarNavigation />
-            <Switch>
-                <Route path="/" exact={true} component={Homepage} />
-                <Route path="/upload" exact={true} component={IndexUpload} />
-            </Switch>
-        </BrowserRouter>
-    );
+  return (
+    <BrowserRouter>
+      <TopBarNavigation />
+      <Switch>
+        <Route path="/" exact={true} component={Homepage} />
+        <Route path="/upload" exact={true} component={IndexUpload} />
+      </Switch>
+    </BrowserRouter>
+  );
 }
 
 const MyTheme = {
-    hideSignUp: true,
+  hideSignUp: true,
 };
 
 export default withAuthenticator(App, MyTheme);

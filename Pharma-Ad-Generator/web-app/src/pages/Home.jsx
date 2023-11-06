@@ -13,6 +13,19 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+// --
+// --  Author:        Jin Tan Ruan
+// --  Date:          04/11/2023
+// --  Purpose:       Home Component
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import { API } from "@aws-amplify/api";
 import { Storage } from "@aws-amplify/storage";
 import {
@@ -26,6 +39,7 @@ import {
   ProgressBar,
   Select,
   SpaceBetween,
+  Flashbar,
 } from "@cloudscape-design/components";
 import { applyTheme } from "@cloudscape-design/components/theming";
 import { useEffect, useState } from "react";
@@ -69,8 +83,9 @@ export function HomeView() {
   const [imageStyle, setImageStyle] = useState(null);
   const [progressValue, setProgressValue] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const [image, setImage] = useState("background.svg");
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 2;
   const BASE_DELAY = 10000; // 10 seconds
 
   const DEFAULT_SUMMARY =
@@ -83,6 +98,15 @@ export function HomeView() {
   const [title, setTitle] = useState(DEFAULT_TITLE);
   const [displayTitle, setDisplayTitle] = useState(DEFAULT_TITLE);
   const [displaySummary, setDisplaySummary] = useState(DEFAULT_SUMMARY);
+
+  const [errorMessage, setErrorMessage] = useState([
+    {
+      header: "Failed to generate content",
+      content: "Internal Server Error. Please try again",
+      dismissLabel: "Dismiss message",
+      type: "error",
+    },
+  ]);
 
   const locationList = [
     {
@@ -289,6 +313,7 @@ export function HomeView() {
   ]);
 
   const handleSubmitButtonClick = () => {
+    setShowAlert(false);
     setButtonDisabled(true);
     setProgressValue(20);
     setIsSubmitted(true);
@@ -296,6 +321,7 @@ export function HomeView() {
   };
 
   const handleImageGenerationButtonClick = () => {
+    setShowAlert(false);
     setButtonDisabled(true);
     setProgressValue(20);
     setIsSubmitted(true);
@@ -303,6 +329,7 @@ export function HomeView() {
   };
 
   const handleTextGenerationButtonClick = () => {
+    setShowAlert(false);
     setButtonDisabled(true);
     setProgressValue(20);
     setIsSubmitted(true);
@@ -360,10 +387,15 @@ export function HomeView() {
 
       if (retryNumber < MAX_RETRIES) {
         console.log(`Retrying... Attempt ${retryNumber + 1} of ${MAX_RETRIES}`);
-        setTimeout(() => {
-          sendMessageToContentAPI(typeGen, retryNumber + 1);
-        }, BASE_DELAY * Math.pow(2, retryNumber));
+        setTimeout(
+          () => {
+            sendMessageToContentAPI(typeGen, retryNumber + 1);
+          },
+          BASE_DELAY * Math.pow(2, retryNumber)
+        );
       } else {
+        setShowAlert(true);
+        setButtonDisabled(false);
         console.log(
           "Max retries reached. Failed to send message to content API."
         );
@@ -878,6 +910,8 @@ export function HomeView() {
             label="Creating the new localize pharmaceutical ads"
           />
         )}
+
+        {showAlert && <Flashbar items={errorMessage} />}
 
         <Header
           variant="h2"
