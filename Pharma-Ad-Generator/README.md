@@ -1,10 +1,8 @@
 # Foundation Models Pharma Ad Generator
 
-### Author: Jin Tan Ruan
-
-### Date: 04/11/2023
-
-### Disclaimer: This code is provided "as is" in accordance with the repository license
+Author: Jin Tan Ruan<br>
+Date: 04/11/2023<br>
+Disclaimer: This code is provided "as is" in accordance with the repository license<br>
 
 A specialized application tailored for the pharmaceutical industry. Harnessing the generative capabilities of foundational models, this tool creates convincing and compliant pharmaceutical advertisements, ensuring content adheres to industry standards and regulations.
 
