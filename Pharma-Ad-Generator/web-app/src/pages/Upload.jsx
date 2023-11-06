@@ -58,6 +58,7 @@ export function Upload() {
   const ITEMS_PER_PAGE = 10;
   const [pdfsCurrentPageIndex, setPdfsCurrentPageIndex] = useState(0);
   const [imagesCurrentPageIndex, setImagesCurrentPageIndex] = useState(0);
+  const [uploadFailed, setUploadFailed] = useState(false);
 
   useEffect(() => {
     const fetchSyncRuns = async () => {
@@ -88,6 +89,8 @@ export function Upload() {
     if (!value.length) return;
 
     setUploading(true);
+    let uploadErrorOccurred = false;
+
     await Promise.all(
       value.map(async (v) => {
         let key;
@@ -106,14 +109,20 @@ export function Upload() {
         try {
           await Storage.put(`${key}/${v.name}`, v);
         } catch (error) {
-          console.log("Error uploading file: ", error);
-          setValue([]);
-          setUploading(false);
+          console.error("Error uploading file: ", error);
+          uploadErrorOccurred = true;
         }
       })
     );
+
     setUploading(false);
-    setFileUploaded(true);
+    if (uploadErrorOccurred) {
+      setUploadFailed(true);
+      setFileUploaded(false);
+    } else {
+      setFileUploaded(true);
+      setUploadFailed(false);
+    }
     setValue([]);
   };
 
@@ -161,20 +170,35 @@ export function Upload() {
             <Flashbar
               items={[
                 {
-                  type: "success",
+                  type: "info",
                   loading: true,
-                  content: <>Document Upload in progress.</>,
+                  content: <>Document Upload in progress...</>,
                 },
               ]}
             />
           )}
-          {fileUploaded && (
+          {!uploading && fileUploaded && (
             <Flashbar
               items={[
                 {
                   type: "success",
                   loading: false,
-                  content: <>Document Uploaded successfully.</>,
+                  content: <>All documents uploaded successfully.</>,
+                },
+              ]}
+            />
+          )}
+          {!uploading && uploadFailed && (
+            <Flashbar
+              items={[
+                {
+                  type: "error",
+                  loading: false,
+                  content: (
+                    <>
+                      One or more documents failed to upload. Please try again.
+                    </>
+                  ),
                 },
               ]}
             />
