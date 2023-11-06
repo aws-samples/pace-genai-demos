@@ -17,11 +17,13 @@ This repository provides code samples for three Generative AI demos, licensed un
    this tool creates convincing and compliant pharmaceutical advertisements, ensuring
    content adheres to industry standards and regulations
 
+![Pharma Ad Generator](./images/pharma-ad-generator.png)
+
 These demos can be seamlessly deployed in your AWS account, offering foundational insights and guidance on utilizing AWS services to create a state-of-the-art Large Language Model (LLM) Generative AI Question and Answer Bot and content generation.
 
 You can deploy these demo's independent of each other. Please refer to the Readme files in each of the folders for deployment instructions.
 
-Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the-power-of-enterprise-data-with-generative-ai-Insights-from-amazon-kendra-langchain-and-large-language-models/) post for details on how these solutions work.
+Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the-power-of-enterprise-data-with-generative-ai-insights-from-amazon-kendra-langchain-and-large-language-models/) post for details on how these solutions work.
 
 ## Authors
 
