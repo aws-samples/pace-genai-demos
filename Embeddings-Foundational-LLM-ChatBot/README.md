@@ -8,8 +8,8 @@ This demo supports the following Amazon Bedrock and SageMaker JumpStart foundati
 - Anthropic - Claude V1
 - AI21 - Jurassic-2 Ultra
 - AI21 - Jurassic-2 Mid
-- SageMaker JumpStart Llama2 13B Chat
-- SageMaker JumpStart Falcon 40B
+- SageMaker JumpStart Llama2 13B Chat (Optional)
+- SageMaker JumpStart Falcon 40B (Optional)
 
 ## Prerequisites
 

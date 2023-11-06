@@ -1,126 +1,130 @@
 .app {
-    display: flex;
-    text-align: center;
-    flex: 1;
-    border-bottom: #282c34;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    align-self: center;
+  display: flex;
+  text-align: center;
+  flex: 1;
+  border-bottom: #282c34;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  align-self: center;
+}
+
+.cs-message-list .cs-typing-indicator {
+  background-color: transparent !important;
 }
 
 .cs-message-list__scroll-wrapper {
-    position: absolute;
-    height: auto;
-    overscroll-behavior-y: auto;
+  position: absolute;
+  height: auto;
+  overscroll-behavior-y: auto;
 }
 
 .cs-message-list {
-    background-color: #fafafa;
+  background-color: #fafafa;
 }
 
 .cs-message__content-wrapper {
-    text-align: left;
+  text-align: left;
 }
 
 .app-logo {
-    height: 40vmin;
-    pointer-events: none;
+  height: 40vmin;
+  pointer-events: none;
 }
 
 .main-container {
-    display: flex;
-    flex: 1;
+  display: flex;
+  flex: 1;
 }
 
 .chat-container {
-    flex: 1;
-    display: flex;
-    height: 100%;
-    width: 700px;
-    border: 0px;
-    background-color: transparent;
+  flex: 1;
+  display: flex;
+  height: 100%;
+  width: 700px;
+  border: 0px;
+  background-color: transparent;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    .app-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+  .app-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
 }
 
 .cs-message:not(:only-child) {
-    margin: 1em 0 0 0;
+  margin: 1em 0 0 0;
 }
 
 .cs-chat-container .cs-message-input {
-    border: 0px;
-    background-color: transparent;
+  border: 0px;
+  background-color: transparent;
 }
 
 .cs-message-input__content-editor-container {
-    align-items: start;
+  align-items: start;
 }
 
 .cs-message-input__content-editor-container > * {
-    align-items: start;
-    text-align: left;
-    flex: 1;
-    width: 100%;
+  align-items: start;
+  text-align: left;
+  flex: 1;
+  width: 100%;
 }
 
 .cs-message__content {
-    border-radius: 0.7em 0.7em 0.7em 0.7em !important;
-    background-color: #eee;
+  border-radius: 0.7em 0.7em 0.7em 0.7em !important;
+  background-color: #eee;
 }
 
 .cs-message--outgoing .cs-message__content {
-    background-color: #c6e3fa;
+  background-color: #c6e3fa;
 }
 
 .cs-main-container {
-    border: 0px;
-    background-color: transparent !important;
+  border: 0px;
+  background-color: transparent !important;
 }
 
 .footer {
-    position: absolute;
-    width: 100%;
-    bottom: 0;
-    font-size: 25px;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  font-size: 25px;
 }
 
 .app-header {
-    background-color: #282c34;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+  background-color: #282c34;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
 }
 
 .app-link {
-    color: #61dafb;
+  color: #61dafb;
 }
 
 .footer-logo {
-    float: left;
-    margin-left: 25px;
-    margin-bottom: 15px;
-    width: 180px;
-    min-width: 150px;
+  float: left;
+  margin-left: 25px;
+  margin-bottom: 15px;
+  width: 180px;
+  min-width: 150px;
 }
 
 @media only screen and (max-width: 600px) {
-    .footer-logo {
-        min-width: 10px;
-    }
+  .footer-logo {
+    min-width: 10px;
+  }
 }
 
 @keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

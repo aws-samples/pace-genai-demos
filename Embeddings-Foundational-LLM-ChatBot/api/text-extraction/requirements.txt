@@ -1,0 +1,7 @@
+langchain
+amazon-textract-caller
+amazon-textract-textractor
+Pillow
+urllib3<2
+pypdf
+pdf2image

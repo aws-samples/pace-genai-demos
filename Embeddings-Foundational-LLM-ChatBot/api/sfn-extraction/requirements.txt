@@ -1,3 +1,0 @@
-langchain
-amazon-textract-caller
-urllib3<2

@@ -1,2 +1,0 @@
-sagemaker==2.168.0
-jsonschema==4.17.0

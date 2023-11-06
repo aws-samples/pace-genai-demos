@@ -1,8 +1,32 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-// SPDX-License-Identifier: MIT-0
 
-import * as ecr from "aws-cdk-lib/aws-ecr";
-import * as ecsPatterns from "@aws-cdk/aws-ecs-patterns";
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+// software and associated documentation files (the "Software"), to deal in the Software
+// without restriction, including without limitation the rights to use, copy, modify,
+// merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR Anp
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// --
+// --  Author:        Jin Tan Ruan
+// --  Linkedin:      https://www.linkedin.com/in/ztanruan
+// --  Date:          04/11/2023
+// --  Purpose:       CDK Resources
+// --  Version:       0.1.0
+// --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+// --  History
+// --  When        Version     Who         What
+// --  -----------------------------------------------------------------
+// --  04/11/2023  0.1.0       jtanruan    Initial
+// --  -----------------------------------------------------------------
+// --
+
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as stepfunctionsTasks from "aws-cdk-lib/aws-stepfunctions-tasks";
@@ -17,26 +41,24 @@ import * as s3Deployment from "aws-cdk-lib/aws-s3-deployment";
 import { Size } from "aws-cdk-lib/core";
 import * as cdk from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import { Construct, Dependable } from "constructs";
+import { Construct } from "constructs";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
-import { Duration, RemovalPolicy } from "aws-cdk-lib";
+import { RemovalPolicy } from "aws-cdk-lib";
 import { SsmParameterReaderConstruct } from "./constructs/ssm-parameter-reader-construct";
-import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
-import * as ssm from "aws-cdk-lib/aws-ssm";
+import { BlockPublicAccess } from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { AmplifyConfigLambdaConstruct } from "./constructs/amplify-config-lambda-construct";
 import { ApiGatewayV2CloudFrontConstruct } from "./constructs/apigatewayv2-cloudfront-construct";
 import { CloudFrontS3WebSiteConstruct } from "./constructs/cloudfront-s3-website-construct";
 import { CognitoWebNativeConstruct } from "./constructs/cognito-web-native-construct";
-import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 
 export interface AppStackProps extends cdk.StackProps {
   readonly ssmWafArnParameterName: string;
   readonly ssmWafArnParameterRegion: string;
+  readonly resourcePrefix: string; // Add this line
 }
 
-import * as cr from "aws-cdk-lib/custom-resources";
-import { GuruApiPythonConstruct } from "./constructs/guru-contructs/guru-api-python-contruct";
+import { ApiGatewayV2LambdaConstruct } from "./constructs/apigatewayv2-lambda-construct";
 
 /**
  * AppStack for an S3 website and api gatewayv2 proxied through a CloudFront distribution
@@ -51,10 +73,12 @@ export class AppStack extends cdk.Stack {
     const awsAccountId = cdk.Stack.of(this).account;
     const awsRegion = cdk.Stack.of(this).region;
 
-    // Construct S3 Bucket -> Stores the PDFs files
-    const documentInputLibraryBucket = new s3.Bucket(
+    const endpoint_name = "e5-largev2";
+    const authentication = "False";
+
+    const documentInputBucket = new s3.Bucket(
       this,
-      "GuruChatEnvInputDocumentLibraryBucket",
+      props.resourcePrefix + "documentInputBucket",
       {
         versioned: true,
         encryption: s3.BucketEncryption.S3_MANAGED,
@@ -66,7 +90,7 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    documentInputLibraryBucket.addCorsRule({
+    documentInputBucket.addCorsRule({
       allowedOrigins: ["*"],
       allowedMethods: [
         s3.HttpMethods.GET,
@@ -80,10 +104,9 @@ export class AppStack extends cdk.Stack {
       maxAge: 3000,
     });
 
-    // Construct S3 Bucket -> Stores the vector PKL for the documents
-    const documentOutputLibraryBucket = new s3.Bucket(
+    const documentOutputBucket = new s3.Bucket(
       this,
-      "GuruChatEnvOutputDocumentLibraryBucket",
+      props.resourcePrefix + "documentOutputBucket",
       {
         versioned: false,
         encryption: s3.BucketEncryption.S3_MANAGED,
@@ -95,25 +118,59 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    new cdk.CfnOutput(this, "GuruChatEnvDocumentInputS3Bucket", {
-      value: documentInputLibraryBucket.bucketName,
-    });
-
-    // Creating the Lambda Layer
-    const bedrockLambdaLayer = new LayerVersion(
+    const defaultDocumentBucket = new s3.Bucket(
       this,
-      "GuruChatEnvBedrockLangchainLayer",
+      props.resourcePrefix + "defaultDocumentBucket",
+      {
+        versioned: false,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+        enforceSSL: true,
+        removalPolicy: RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      }
+    );
+
+    const ModelPackageBucket = new s3.Bucket(
+      this,
+      props.resourcePrefix + "modelPackageBucket",
+      {
+        versioned: false,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+        enforceSSL: true,
+        removalPolicy: RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      }
+    );
+
+    const temporaryDocumentBucket = new s3.Bucket(
+      this,
+      props.resourcePrefix + "temporaryDocumentBucket",
+      {
+        versioned: false,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        enforceSSL: true,
+        removalPolicy: RemovalPolicy.DESTROY,
+        autoDeleteObjects: true,
+      }
+    );
+
+    const bedrockLangchainLayer = new LayerVersion(
+      this,
+      props.resourcePrefix + "bedrockLangchainLayer",
       {
         compatibleRuntimes: [Runtime.PYTHON_3_10],
         compatibleArchitectures: [Architecture.ARM_64],
         code: Code.fromAsset(
-          "../lambda-layer/python-bedrock-langchain-layer.zip"
+          "../lambda_langchain_layer/python-bedrock-langchain-layer.zip"
         ),
       }
     );
 
     const cognito = new CognitoWebNativeConstruct(this, "Cognito", {
-      documentInputLibraryBucketArn: documentInputLibraryBucket.bucketArn,
+      documentInputLibraryBucketArn: documentInputBucket.bucketArn,
     });
 
     const cfWafWebAcl = new SsmParameterReaderConstruct(
@@ -136,477 +193,109 @@ export class AppStack extends cdk.Stack {
       userPoolClient: cognito.webClientUserPool,
     });
 
-    new AmplifyConfigLambdaConstruct(this, "AmplifyConfigFn", {
-      api: api.apiGatewayV2,
-      appClientId: cognito.webClientId,
-      identityPoolId: cognito.identityPoolId,
-      userPoolId: cognito.userPoolId,
-    });
-
-    // Construct DynamoDB Table -> Chat Context
     const chatContextTable = new dynamodb.Table(
       this,
-      "GuruChatEnvContextDynamoTable",
-      {
-        partitionKey: { name: "pk", type: dynamodb.AttributeType.STRING },
-        removalPolicy: RemovalPolicy.DESTROY,
-        sortKey: { name: "sk", type: dynamodb.AttributeType.STRING },
-      }
-    );
-
-    // Construct S3 Bucket -> Stores the serialized vector for the chat bot
-    const chatBotConversationLogBucket = new s3.Bucket(
-      this,
-      "GuruChatEnvSerializedVectorBucket",
-      {
-        versioned: false,
-        encryption: s3.BucketEncryption.S3_MANAGED,
-        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-        enforceSSL: true,
-        removalPolicy: RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
-      }
-    );
-
-    // Construct S3 Bucket -> Stores the package model
-    const chatBotSageMakerModelsBucket = new s3.Bucket(
-      this,
-      "GuruChatEnvSageMakerModelsBucket",
-      {
-        versioned: false,
-        encryption: s3.BucketEncryption.S3_MANAGED,
-        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-        enforceSSL: true,
-        removalPolicy: RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
-      }
-    );
-
-    new cdk.CfnOutput(this, "GuruChatEnvSerializedVectorBucketName", {
-      value: chatBotConversationLogBucket.bucketName,
-    });
-
-    new cdk.CfnOutput(this, "GuruChatEnvSageMakerModelsBucketName", {
-      value: chatBotSageMakerModelsBucket.bucketName,
-    });
-
-    const EmbeddingsModelPackageBucket = new s3.Bucket(
-      this,
-      "GuruChatEnvEmbeddingsModelPackageBucket",
-      {
-        versioned: false,
-        encryption: s3.BucketEncryption.S3_MANAGED,
-        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-        enforceSSL: true,
-        removalPolicy: RemovalPolicy.DESTROY,
-        autoDeleteObjects: true,
-      }
-    );
-
-    const EmbeddingsModelDeployment = new s3Deployment.BucketDeployment(
-      this,
-      "GuruChatEnvDeployEmbeddingsModel",
-      {
-        sources: [s3Deployment.Source.asset("../embeddings_model_host")],
-        destinationBucket: EmbeddingsModelPackageBucket,
-        prune: false,
-        memoryLimit: 10000,
-        ephemeralStorageSize: Size.gibibytes(10),
-      }
-    );
-
-    // Create the SageMaker ExecutionRole
-    const SagemakerExecutionRole = new iam.Role(
-      this,
-      "GuruChatEnvSagemakerExecutionRole",
-      {
-        assumedBy: new iam.ServicePrincipal("sagemaker.amazonaws.com"),
-      }
-    );
-
-    // Add permissions to read from the S3 bucket
-    EmbeddingsModelPackageBucket.grantRead(SagemakerExecutionRole);
-
-    // Attach AmazonSageMakerFullAccess policy to the execution role
-    SagemakerExecutionRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSageMakerFullAccess")
-    );
-
-    const sageMakerEmbeddingModelHandlerFn = new lambdaPython.PythonFunction(
-      this,
-      "GuruChatEnvSageMakerEmbeddingModelHandlerFn",
-      {
-        runtime: Runtime.PYTHON_3_9,
-        handler: "lambda_handler",
-        index: "lambda_function.py",
-        entry: "../api/fn-embeddings",
-        timeout: cdk.Duration.minutes(15),
-        environment: {
-          S3_EMBEDDING_MODEL_PACKAGE_NAME:
-            EmbeddingsModelPackageBucket.bucketName,
-          SAGEMAKER_EXECUTION_ROLE: SagemakerExecutionRole.roleArn,
-        },
-        memorySize: 2000,
-        architecture: cdk.aws_lambda.Architecture.X86_64,
-      }
-    );
-
-    // add sagemaker managed policy to the lambda function
-    sageMakerEmbeddingModelHandlerFn.role?.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSageMakerFullAccess")
-    );
-
-    // Add permissions to read from the S3 bucket
-    EmbeddingsModelPackageBucket.grantRead(sageMakerEmbeddingModelHandlerFn);
-
-    sageMakerEmbeddingModelHandlerFn.addEventSource(
-      new S3EventSource(EmbeddingsModelPackageBucket, {
-        events: [
-          s3.EventType.OBJECT_CREATED_PUT,
-          s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
-        ],
-      })
-    );
-
-    // Construct DynamoDB Table -> Documents
-    const documentTable = new dynamodb.Table(
-      this,
-      "GuruChatEnvChatDocumentTable",
+      props.resourcePrefix + "chatContextTable",
       {
         partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
         removalPolicy: RemovalPolicy.DESTROY,
+        sortKey: { name: "connection_id", type: dynamodb.AttributeType.STRING },
+        pointInTimeRecovery: true,
       }
     );
 
-    const insertDefaultDocumentHandlerFn = new lambdaPython.PythonFunction(
+    const documentTable = new dynamodb.Table(
       this,
-      "GuruChatEnvInsertDefaultDocumentHandlerFn",
+      props.resourcePrefix + "documentTable",
       {
-        runtime: Runtime.PYTHON_3_9,
-        handler: "lambda_handler",
-        index: "lambda_function.py",
-        entry: "../api/fn-insert-default-document",
-        timeout: cdk.Duration.minutes(3),
-        retryAttempts: 0,
-        memorySize: 1024,
-        architecture: cdk.aws_lambda.Architecture.X86_64,
-        environment: {
-          DYNAMODB_TABLE_NAME: documentTable.tableName,
-          S3_OUTPUT_ASSETS_BUCKET_NAME: documentOutputLibraryBucket.bucketName,
-        },
+        partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+        removalPolicy: RemovalPolicy.DESTROY,
+        pointInTimeRecovery: true,
       }
     );
 
-    documentTable.grantWriteData(insertDefaultDocumentHandlerFn);
-
-    new cdk.CfnOutput(this, "GuruChatEnvDocumentTableArn", {
-      value: documentTable.tableArn,
-    });
-
-    insertDefaultDocumentHandlerFn.node.addDependency(documentTable);
-
-    const customInsertDocumentResource = new cdk.CustomResource(
+    const vpcFlowLogsBucket = new s3.Bucket(
       this,
-      "GuruChatEnvInsertDocumentRecord",
-      {
-        serviceToken: insertDefaultDocumentHandlerFn.functionArn,
-      }
-    );
-
-    customInsertDocumentResource.node.addDependency(
-      insertDefaultDocumentHandlerFn
-    );
-
-    const eventSource = new S3EventSource(documentOutputLibraryBucket, {
-      events: [
-        s3.EventType.OBJECT_CREATED_PUT,
-        s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
-      ],
-    });
-
-    const defaultEmbeddingsDocumentDeployment =
-      new s3Deployment.BucketDeployment(
-        this,
-        "GuruChatEnvDeployDefaultEmbeddingsDocument",
-        {
-          sources: [s3Deployment.Source.asset("../default_documents")],
-          destinationBucket: documentOutputLibraryBucket,
-          prune: false,
-          memoryLimit: 5000,
-          ephemeralStorageSize: Size.gibibytes(4),
-        }
-      );
-
-    // add sagemaker managed policy to the lambda function
-
-    const dynamoDbReadOnlyPolicyDocumentTable = new iam.PolicyStatement({
-      actions: [
-        "dynamodb:BatchGetItem",
-        "dynamodb:DescribeImport",
-        "dynamodb:ConditionCheckItem",
-        "dynamodb:DescribeContributorInsights",
-        "dynamodb:Scan",
-        "dynamodb:ListTagsOfResource",
-        "dynamodb:Query",
-        "dynamodb:DescribeStream",
-        "dynamodb:DescribeTimeToLive",
-        "dynamodb:DescribeGlobalTableSettings",
-        "dynamodb:PartiQLSelect",
-        "dynamodb:DescribeTable",
-        "dynamodb:GetShardIterator",
-        "dynamodb:DescribeGlobalTable",
-        "dynamodb:GetItem",
-        "dynamodb:DescribeContinuousBackups",
-        "dynamodb:DescribeExport",
-        "dynamodb:DescribeKinesisStreamingDestination",
-        "dynamodb:DescribeBackup",
-        "dynamodb:GetRecords",
-        "dynamodb:DescribeTableReplicaAutoScaling",
-      ],
-      resources: [
-        `arn:aws:dynamodb:*:${awsAccountId}:table/${documentTable.tableName}`,
-      ],
-    });
-
-    const sagemakerFullAccessPolicy = new iam.PolicyStatement({
-      actions: ["*"],
-      resources: ["*"],
-    });
-
-    const s3BucketAccessPolicy = new iam.PolicyStatement({
-      actions: ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
-      resources: [
-        `arn:aws:s3:::${documentOutputLibraryBucket.bucketName}/*`,
-        `arn:aws:s3:::${chatBotConversationLogBucket.bucketName}/*`,
-      ],
-    });
-
-    const dynamoDbAccessPolicyContextTable = new iam.PolicyStatement({
-      actions: [
-        "dynamodb:BatchGetItem",
-        "dynamodb:DescribeImport",
-        "dynamodb:ConditionCheckItem",
-        "dynamodb:DescribeContributorInsights",
-        "dynamodb:Scan",
-        "dynamodb:ListTagsOfResource",
-        "dynamodb:Query",
-        "dynamodb:DescribeStream",
-        "dynamodb:DescribeTimeToLive",
-        "dynamodb:DescribeGlobalTableSettings",
-        "dynamodb:PartiQLSelect",
-        "dynamodb:DescribeTable",
-        "dynamodb:GetShardIterator",
-        "dynamodb:DescribeGlobalTable",
-        "dynamodb:GetItem",
-        "dynamodb:DescribeContinuousBackups",
-        "dynamodb:DescribeExport",
-        "dynamodb:DescribeKinesisStreamingDestination",
-        "dynamodb:DescribeBackup",
-        "dynamodb:GetRecords",
-        "dynamodb:DescribeTableReplicaAutoScaling",
-        "dynamodb:PutItem",
-        "dynamodb:UpdateItem",
-        "dynamodb:DeleteItem",
-      ],
-      resources: [
-        `arn:aws:dynamodb:*:${awsAccountId}:table/${chatContextTable.tableName}`,
-      ],
-    });
-
-    // Allow Lambda to read from SSM Parameter Store
-    const ssmAPIEndpointKeyaPolicy = new iam.PolicyStatement({
-      actions: ["secretsmanager:GetSecretValue"],
-      resources: ["*"],
-    });
-
-    const documentsArtifactsHandlerRole = new cdk.aws_iam.Role(
-      this,
-      "GuruChatEnvDocumentsArtifactsHandlerRole",
-      {
-        description: "Role used by the Documents Artifacts Lambda function",
-        assumedBy: new cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
-      }
-    );
-
-    documentsArtifactsHandlerRole.addToPolicy(
-      new cdk.aws_iam.PolicyStatement({
-        actions: ["*"],
-        resources: ["*"],
-      })
-    );
-
-    const apis = [
-      {
-        name: "ListDocuments",
-        runtime: cdk.aws_lambda.Runtime.PYTHON_3_9,
-        handler: "lambda_handler",
-        index: "lambda_function.py",
-        entry: "../api/fn-list-document",
-        timeout: cdk.Duration.minutes(5),
-        environment: {
-          DYNAMODB_TABLE_NAME: documentTable.tableName,
-        },
-        routePath: "/api/document/list",
-        methods: [apigwv2.HttpMethod.GET],
-        memorySize: 2000,
-        api: api.apiGatewayV2,
-        role: documentsArtifactsHandlerRole,
-        layers: [],
-        arch: Architecture.X86_64,
-      },
-      {
-        name: "AI21UltraModel",
-        runtime: cdk.aws_lambda.Runtime.PYTHON_3_10,
-        handler: "lambda_handler",
-        index: "lambda_function.py",
-        entry: "../api/fn-ai21-ultra-v1",
-        timeout: cdk.Duration.minutes(5),
-        environment: {
-          DYNAMODB_TABLE_NAME: chatContextTable.tableName,
-          S3_ASSETS_BUCKET_NAME: documentOutputLibraryBucket.bucketName,
-          EMBEDDINGS_SAGEMAKER_ENDPOINT: "e5-largeV1",
-        },
-        routePath: "/api/ai21-ultra-v1",
-        methods: [apigwv2.HttpMethod.POST],
-        api: api.apiGatewayV2,
-        memorySize: 8000,
-        role: documentsArtifactsHandlerRole,
-        layers: [bedrockLambdaLayer],
-        arch: Architecture.ARM_64,
-      },
-    ];
-
-    for (const val of apis) {
-      new GuruApiPythonConstruct(this, val.name, {
-        name: val.name,
-        runtime: val.runtime ? val.runtime : cdk.aws_lambda.Runtime.PYTHON_3_10,
-        handler: val.handler ? val.handler : "lambda_handler",
-        index: val.index ? val.index : "lambda_function.py",
-        entry: val.entry,
-        timeout: val.timeout,
-        memorySize: val.memorySize,
-        environment: val.environment,
-        routePath: val.routePath,
-        methods: val.methods,
-        api: val.api,
-        role: val.role,
-        layers: val.layers,
-        arch: val.arch,
-      });
-    }
-
-    const fullAccessPolicy = new iam.PolicyStatement({
-      actions: ["*"],
-      resources: ["*"],
-    });
-
-    const temporaryDocumentBucket = new s3.Bucket(
-      this,
-      "GuruChatEnvTemporaryDocumentBucket",
+      props.resourcePrefix + "vpcFlowLogsBucket",
       {
         versioned: false,
         encryption: s3.BucketEncryption.S3_MANAGED,
-        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
         enforceSSL: true,
         removalPolicy: RemovalPolicy.DESTROY,
+        eventBridgeEnabled: true,
         autoDeleteObjects: true,
       }
     );
 
-    const vpc = new ec2.Vpc(this, "MyVpc", { maxAzs: 2 });
-    const securityGroup = new ec2.SecurityGroup(
-      this,
-      "GuruChatEnvSecurityGroup",
-      {
-        vpc,
-        description: "guru foundations security group ecs task",
-        allowAllOutbound: true,
-      }
-    );
-
-    const taskRole = new iam.Role(this, "GuruChatEnvTaskRole", {
-      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+    const vpc = new ec2.Vpc(this, props.resourcePrefix + "vPC", {
+      maxAzs: 2,
     });
 
-    taskRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess")
-    );
-
-    const executionRole = new iam.Role(this, "GuruChatEnvExecutionRole", {
-      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
+    vpc.addFlowLog(props.resourcePrefix + "-flowLogS3", {
+      destination: ec2.FlowLogDestination.toS3(vpcFlowLogsBucket),
+      trafficType: ec2.FlowLogTrafficType.ALL,
     });
-    executionRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess")
-    );
 
-    const cluster = new ecs.Cluster(this, "GuruChatEnvEcsCluster", {
+    new ec2.SecurityGroup(this, props.resourcePrefix + "securityGroup", {
+      vpc,
+      description: "Guru Embeddings Security Group ECS Task",
+      allowAllOutbound: true,
+    });
+
+    const cluster = new ecs.Cluster(this, props.resourcePrefix + "ecsCluster", {
       vpc,
       containerInsights: true,
     });
 
-    const taskDef = new ecs.FargateTaskDefinition(this, "GuruChatEnvTaskDef", {
-      runtimePlatform: {
-        cpuArchitecture: ecs.CpuArchitecture.ARM64,
-      },
-      cpu: 1024,
-      memoryLimitMiB: 6144,
-      taskRole: taskRole,
-      executionRole: executionRole,
-    });
-
-    const logging = new ecs.AwsLogDriver({
-      streamPrefix: "GuruChatEnvEcsLogging",
-    });
-
-    const dynamodbTableDocumentNameSecret = new secretsmanager.Secret(
+    const taskExecutionRole = new iam.Role(
       this,
-      "GuruChatEnvDynamodbTableDocumentNameSecret",
+      props.resourcePrefix + "TaskExecutionRole",
       {
-        secretName: "dynamodbTableDocumentNameSecret",
-        description: "dynamodbTableDocumentNameSecret",
-        generateSecretString: {
-          secretStringTemplate: JSON.stringify({
-            tableName: documentTable.tableName,
-          }),
-          generateStringKey: "tableNameSecret",
-        },
+        assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
       }
     );
 
-    const container = taskDef.addContainer("GuruChatEnvContainer", {
-      image: ecs.ContainerImage.fromAsset("../ecs_processing_task"),
-      cpu: 1024,
-      memoryLimitMiB: 4096,
-      logging: logging,
+    taskExecutionRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/ecs/*`,
+        ],
+      })
+    );
+
+    const taskRole = new iam.Role(this, props.resourcePrefix + "TaskRole", {
+      assumedBy: new iam.ServicePrincipal("ecs-tasks.amazonaws.com"),
     });
 
     taskRole.addToPolicy(
       new iam.PolicyStatement({
-        actions: [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:Scan",
-          "dynamodb:Query",
-          "dynamodb:DeleteItem",
-        ],
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:PutItem", "dynamodb:UpdateItem"],
         resources: [
-          `arn:aws:dynamodb:*:${awsAccountId}:table/${documentTable.tableName}`,
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${documentTable.tableName}`,
         ],
       })
     );
 
     taskRole.addToPolicy(
       new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
         actions: [
-          "s3:PutObject",
           "s3:GetObject",
-          "s3:ListBucket",
+          "s3:PutObject",
           "s3:DeleteObject",
+          "s3:PutObjectAcl",
+          "s3:GetObjectVersion",
         ],
         resources: [
-          `arn:aws:s3:::${documentOutputLibraryBucket.bucketName}/*`,
-          `arn:aws:s3:::${documentInputLibraryBucket.bucketName}/*`,
+          `arn:aws:s3:::${documentOutputBucket.bucketName}/*`,
           `arn:aws:s3:::${temporaryDocumentBucket.bucketName}/*`,
         ],
       })
@@ -614,111 +303,263 @@ export class AppStack extends cdk.Stack {
 
     taskRole.addToPolicy(
       new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
         actions: ["sagemaker:InvokeEndpoint"],
         resources: [
-          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint/e5-largeV1`,
+          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint/*`,
         ],
       })
     );
 
-    const vectorDocumentHandlerFn = new lambdaPython.PythonFunction(
+    const taskDefinition = new ecs.FargateTaskDefinition(
       this,
-      "GuruChatEnvEcsTriggerTaskHandlerFn",
+      props.resourcePrefix + "taskDefinition",
+      {
+        runtimePlatform: {
+          cpuArchitecture: ecs.CpuArchitecture.ARM64,
+        },
+        cpu: 2048,
+        memoryLimitMiB: 6144,
+        executionRole: taskExecutionRole,
+        taskRole: taskRole,
+      }
+    );
+
+    const logging = new ecs.AwsLogDriver({
+      streamPrefix: props.resourcePrefix + "ecsLogging",
+    });
+
+    const container = taskDefinition.addContainer(
+      props.resourcePrefix + "container",
+      {
+        image: ecs.ContainerImage.fromAsset("../ecs_task_definition"),
+        cpu: 1024,
+        memoryLimitMiB: 4096,
+        logging: logging,
+      }
+    );
+
+    const listDocumentHandlerFn = new lambdaPython.PythonFunction(
+      this,
+      props.resourcePrefix + "listDocumentHandlerFn",
       {
         runtime: Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "lambda_function.py",
-        entry: "../api/sfn-trigger-ecs-task",
-        timeout: cdk.Duration.minutes(15),
+        entry: "../api/list-document",
         retryAttempts: 0,
-        memorySize: 1024,
+        timeout: cdk.Duration.minutes(3),
+        memorySize: 2000,
         architecture: cdk.aws_lambda.Architecture.X86_64,
         environment: {
-          CLUSTER_NAME: cluster.clusterName,
-          TASK_DEFINITION: taskDef.taskDefinitionArn,
-          SUBNET_1: vpc.publicSubnets[0].subnetId,
-          SUBNET_2: vpc.publicSubnets[1].subnetId,
-          BUCKET_NAME: documentInputLibraryBucket.bucketName,
-          S3_OUTPUT_ASSETS_BUCKET_NAME: documentOutputLibraryBucket.bucketName,
+          DOCUMENT_TABLE_NAME: documentTable.tableName,
         },
       }
     );
 
-    // Permission to run tasks on ECS
-    const runTaskPermission = new iam.PolicyStatement({
-      actions: ["ecs:RunTask"],
-      resources: ["*"],
-    });
-    const s3ReadPermission = new iam.PolicyStatement({
-      actions: ["*"],
-      resources: ["*"],
+    listDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:Scan"],
+        resources: [
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${documentTable.tableName}`,
+        ],
+      })
+    );
+
+    listDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
+        ],
+      })
+    );
+
+    new ApiGatewayV2LambdaConstruct(this, props.resourcePrefix + "apiGateway", {
+      lambdaFn: listDocumentHandlerFn,
+      routePath: "/api/document/list",
+      methods: [apigwv2.HttpMethod.GET],
+      api: api.apiGatewayV2,
     });
 
-    vectorDocumentHandlerFn.addToRolePolicy(runTaskPermission);
-    vectorDocumentHandlerFn.addToRolePolicy(fullAccessPolicy);
-    vectorDocumentHandlerFn.addEventSource(
-      new S3EventSource(temporaryDocumentBucket, {
-        events: [
-          s3.EventType.OBJECT_CREATED_PUT,
-          s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
+    const embeddingHandlerFn = new lambdaPython.PythonFunction(
+      this,
+      props.resourcePrefix + "embeddingHandlerFn",
+      {
+        runtime: Runtime.PYTHON_3_9,
+        handler: "lambda_handler",
+        index: "lambda_function.py",
+        entry: "../api/vectorization",
+        timeout: cdk.Duration.minutes(15),
+        retryAttempts: 0,
+        memorySize: 2048,
+        architecture: cdk.aws_lambda.Architecture.X86_64,
+        environment: {
+          CLUSTER_NAME: cluster.clusterName,
+          TASK_DEFINITION: taskDefinition.taskDefinitionArn,
+          SUBNET_1: vpc.publicSubnets[0].subnetId,
+          SUBNET_2: vpc.publicSubnets[1].subnetId,
+          INPUT_BUCKET_NAME: documentInputBucket.bucketName,
+          OUTPUT_BUCKET_NAME: documentOutputBucket.bucketName,
+          CONTAINER_NAME: container.containerName,
+        },
+      }
+    );
+
+    embeddingHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ecs:RunTask"],
+        resources: [taskDefinition.taskDefinitionArn],
+      })
+    );
+    embeddingHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["iam:PassRole", "sts:AssumeRole"],
+        resources: [taskExecutionRole.roleArn, taskDefinition.taskRole.roleArn],
+      })
+    );
+
+    embeddingHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
         ],
       })
     );
 
     const textractDocumentHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruChatEnvTextractDocumentHandlerFn",
+      props.resourcePrefix + "textractDocumentHandlerFn",
       {
-        runtime: Runtime.PYTHON_3_9,
+        runtime: Runtime.PYTHON_3_10,
         handler: "lambda_handler",
         index: "lambda_function.py",
-        entry: "../api/sfn-extraction",
+        entry: "../api/text-extraction",
         timeout: cdk.Duration.minutes(15),
         retryAttempts: 0,
-        memorySize: 1024,
+        memorySize: 3096,
         architecture: cdk.aws_lambda.Architecture.X86_64,
         environment: {
-          DYNAMODB_TABLE_NAME: documentTable.tableName,
+          DOCUMENT_TABLE_NAME: documentTable.tableName,
           TEMPORARY_BUCKET_NAME: temporaryDocumentBucket.bucketName,
-          EMBEDDINGS_SAGEMAKER_ENDPOINT_NAME: "e5-largeV1",
-          S3_OUTPUT_ASSETS_BUCKET_NAME:
-            documentOutputLibraryBucket.bucketDomainName,
+          EMBEDDINGS_ENDPOINT_NAME: endpoint_name,
+          OUTPUT_BUCKET_NAME: documentOutputBucket.bucketDomainName,
         },
       }
     );
 
-    textractDocumentHandlerFn.addToRolePolicy(fullAccessPolicy);
+    textractDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:GetObject", "s3:PutObject", "s3:ListBucket"],
+        resources: [
+          `arn:aws:s3:::${documentInputBucket.bucketName}/*`,
+          `arn:aws:s3:::${temporaryDocumentBucket.bucketName}/*`,
+        ],
+      })
+    );
 
-    vectorDocumentHandlerFn.addToRolePolicy(fullAccessPolicy);
+    textractDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
+        ],
+      })
+    );
 
-    const stepFunctionErrorCatchHandlerFn = new lambdaPython.PythonFunction(
+    textractDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:PutItem", "dynamodb:UpdateItem"],
+        resources: [
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${documentTable.tableName}`,
+        ],
+      })
+    );
+
+    textractDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "textract:StartDocumentTextDetection",
+          "textract:DetectDocumentText",
+          "textract:GetDocumentTextDetection",
+          "textract:AnalyzeDocument",
+        ],
+        resources: ["*"],
+      })
+    );
+
+    const errorCatchHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruChatEnvStepFunctionErrorCatchHandlerFn",
+      props.resourcePrefix + "errorCatchHandlerFn",
       {
         runtime: Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "lambda_function.py",
-        entry: "../api/sfn-error-handling",
+        entry: "../api/error-handler",
         timeout: cdk.Duration.minutes(15),
         retryAttempts: 0,
         memorySize: 1024,
         architecture: cdk.aws_lambda.Architecture.X86_64,
         environment: {
-          DYNAMODB_TABLE_NAME: documentTable.tableName,
+          DOCUMENT_TABLE_NAME: documentTable.tableName,
         },
       }
     );
 
-    stepFunctionErrorCatchHandlerFn.addToRolePolicy(fullAccessPolicy);
+    errorCatchHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:UpdateItem"],
+        resources: [
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${documentTable.tableName}`,
+        ],
+      })
+    );
 
-    const checkEcsCompletionHandlerFn = new lambdaPython.PythonFunction(
+    errorCatchHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
+        ],
+      })
+    );
+
+    const checkCompletionHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruChatEnvCheckEcsCompletionHandlerFn",
+      props.resourcePrefix + "checkEcsCompletionHandlerFn",
       {
         runtime: Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "lambda_function.py",
-        entry: "../api/sfn-check-ecs",
+        entry: "../api/check-status",
         timeout: cdk.Duration.minutes(15),
         retryAttempts: 0,
         memorySize: 1024,
@@ -726,17 +567,24 @@ export class AppStack extends cdk.Stack {
         environment: {
           ECS_CLUSTER_NAME: cluster.clusterName,
           CLUSTER_NAME: cluster.clusterName,
-          TASK_DEFINITION: taskDef.taskDefinitionArn,
+          TASK_DEFINITION: taskDefinition.taskDefinitionArn,
           SUBNET_1: vpc.publicSubnets[0].subnetId,
           SUBNET_2: vpc.publicSubnets[1].subnetId,
-          BUCKET_NAME: documentInputLibraryBucket.bucketName,
-          S3_OUTPUT_ASSETS_BUCKET_NAME:
-            documentOutputLibraryBucket.bucketDomainName,
+          INPUT_BUCKET_NAME: documentInputBucket.bucketName,
+          OUTPUT_BUCKET_NAME: documentOutputBucket.bucketDomainName,
         },
       }
     );
 
-    checkEcsCompletionHandlerFn.addToRolePolicy(fullAccessPolicy);
+    checkCompletionHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ecs:DescribeTasks"],
+        resources: [
+          `arn:aws:ecs:${awsRegion}:${awsAccountId}:task/${cluster.clusterName}/*`,
+        ],
+      })
+    );
 
     const textractTask = new stepfunctionsTasks.LambdaInvoke(
       this,
@@ -747,34 +595,33 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    // Create a Step Function with the Lambda functions in a chain
-    const vectorTask = new stepfunctionsTasks.LambdaInvoke(
+    const embeddingTask = new stepfunctionsTasks.LambdaInvoke(
       this,
       "Text Embedding",
       {
-        lambdaFunction: vectorDocumentHandlerFn,
+        lambdaFunction: embeddingHandlerFn,
         outputPath: "$.Payload",
       }
     );
 
-    const waitXSeconds = new stepfunctions.Wait(this, "Wait X Seconds", {
+    const wait30Seconds = new stepfunctions.Wait(this, "Wait 30 Seconds", {
       time: stepfunctions.WaitTime.duration(cdk.Duration.seconds(30)),
     });
 
     const checkEcsCompletionTask = new stepfunctionsTasks.LambdaInvoke(
       this,
-      "Check ECS Completion",
+      "Is Ecs Task Complete?",
       {
-        lambdaFunction: checkEcsCompletionHandlerFn,
+        lambdaFunction: checkCompletionHandlerFn,
         outputPath: "$.Payload",
       }
     );
 
     const errorState = new stepfunctionsTasks.LambdaInvoke(
       this,
-      "Catch Error",
+      "Catching an Error",
       {
-        lambdaFunction: stepFunctionErrorCatchHandlerFn,
+        lambdaFunction: errorCatchHandlerFn,
         payload: stepfunctions.TaskInput.fromObject({
           entirePayload: stepfunctions.JsonPath.entirePayload,
         }),
@@ -788,33 +635,33 @@ export class AppStack extends cdk.Stack {
       },
     });
 
-    const isDoneChoice = new stepfunctions.Choice(this, "Is ECS Task Done?");
+    const isDoneChoice = new stepfunctions.Choice(this, "Is Ecs Task Done?");
     isDoneChoice.when(
       stepfunctions.Condition.booleanEquals("$.done", true),
       endState
     );
-    isDoneChoice.otherwise(waitXSeconds);
+    isDoneChoice.otherwise(wait30Seconds);
 
-    waitXSeconds.next(checkEcsCompletionTask);
+    wait30Seconds.next(checkEcsCompletionTask);
     checkEcsCompletionTask.next(isDoneChoice);
 
     textractTask.addCatch(errorState, {
       resultPath: "$.errorInfo",
     });
-    vectorTask.addCatch(errorState, {
+    embeddingTask.addCatch(errorState, {
       resultPath: "$.errorInfo",
     });
 
-    const definition = textractTask.next(vectorTask).next(waitXSeconds);
+    const definition = textractTask.next(embeddingTask).next(wait30Seconds);
 
     const logPipelineGroup = new logs.LogGroup(
       this,
-      "GuruChatEnvStateMachineLogGroup"
+      props.resourcePrefix + "stateMachineLogGroup"
     );
 
-    const documentPipelineSfn = new stepfunctions.StateMachine(
+    const documentEmbeddingsPipeline = new stepfunctions.StateMachine(
       this,
-      "GuruChatEnvDocumentPipelineSfn",
+      props.resourcePrefix + "documentEmbeddingsPipeline",
       {
         definition,
         timeout: cdk.Duration.minutes(60),
@@ -826,33 +673,486 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    const s3TriggerStepFunctionHandlerFn = new lambdaPython.PythonFunction(
+    const s3TriggerPipelineHandlerFn = new lambdaPython.PythonFunction(
       this,
-      "GuruChatEnvS3TriggerStepFunctionHandlerFn",
+      props.resourcePrefix + "s3TriggerPipelineHandlerFn",
       {
         runtime: Runtime.PYTHON_3_9,
         handler: "lambda_handler",
         index: "lambda_function.py",
-        entry: "../api/sfn-trigger",
+        entry: "../api/trigger-pipeline",
         timeout: cdk.Duration.minutes(15),
         retryAttempts: 0,
         memorySize: 1024,
         architecture: cdk.aws_lambda.Architecture.X86_64,
         environment: {
-          STATE_MACHINE_ARN: documentPipelineSfn.stateMachineArn,
+          STATE_MACHINE_ARN: documentEmbeddingsPipeline.stateMachineArn,
         },
       }
     );
 
-    s3TriggerStepFunctionHandlerFn.addToRolePolicy(fullAccessPolicy);
-
-    s3TriggerStepFunctionHandlerFn.addEventSource(
-      new S3EventSource(documentInputLibraryBucket, {
+    s3TriggerPipelineHandlerFn.addEventSource(
+      new S3EventSource(documentInputBucket, {
         events: [
           s3.EventType.OBJECT_CREATED_PUT,
           s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
         ],
       })
     );
+
+    s3TriggerPipelineHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["states:StartExecution"],
+        resources: [
+          `arn:aws:states:${awsRegion}:${awsAccountId}:stateMachine:${documentEmbeddingsPipeline.stateMachineName}`,
+        ],
+      })
+    );
+
+    s3TriggerPipelineHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+        resources: [`arn:aws:s3:::${documentInputBucket.bucketName}/*`],
+      })
+    );
+
+    const sagemakerPrincipalRole = new cdk.aws_iam.Role(
+      this,
+      props.resourcePrefix + "sageMakerEmbeddingsRole",
+      {
+        description: "Role SageMaker Embeddings",
+        assumedBy: new cdk.aws_iam.ServicePrincipal("sagemaker.amazonaws.com"),
+      }
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["sagemaker:CreateModel", "sagemaker:DeleteModel"],
+        resources: [`arn:aws:sagemaker:${awsRegion}:${awsAccountId}:model/*`],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: [
+          "sagemaker:CreateEndpoint",
+          "sagemaker:DeleteEndpoint",
+          "sagemaker:DescribeEndpoint",
+          "sagemaker:UpdateEndpoint",
+        ],
+        resources: [
+          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint/*`,
+        ],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: [
+          "ecr:ListTagsForResource",
+          "ecr:ListImages",
+          "ecr:DescribeRepositories",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetLifecyclePolicyPreview",
+          "ecr:DescribeImageScanFindings",
+          "ecr:GetLifecyclePolicy",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:DescribeImages",
+          "ecr:GetAuthorizationToken",
+          "ecr:GetRegistryPolicy",
+        ],
+        resources: ["*"],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/sagemaker/*`,
+        ],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:ListBucket", "s3:CreateBucket"],
+        resources: [
+          `arn:aws:s3:::${ModelPackageBucket.bucketName}`,
+          `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}`,
+        ],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:PutObjectAcl",
+          "s3:GetObjectVersion",
+        ],
+        resources: [
+          `arn:aws:s3:::${ModelPackageBucket.bucketName}/*`,
+          `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}/*`,
+        ],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "sagemaker:CreateEndpointConfig",
+          "sagemaker:DeleteEndpointConfig",
+          "sagemaker:DescribeEndpointConfig",
+        ],
+        resources: [
+          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint-config/${endpoint_name}`,
+        ],
+      })
+    );
+
+    sagemakerPrincipalRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["iam:PassRole", "sts:AssumeRole"],
+        resources: [sagemakerPrincipalRole.roleArn],
+      })
+    );
+
+    const ModelHandlerFn = new lambdaPython.PythonFunction(
+      this,
+      props.resourcePrefix + "modelHandlerFn",
+      {
+        runtime: Runtime.PYTHON_3_9,
+        handler: "lambda_handler",
+        index: "lambda_function.py",
+        entry: "../api/embeddings-handler",
+        timeout: cdk.Duration.minutes(15),
+        retryAttempts: 0,
+        memorySize: 4000,
+        architecture: cdk.aws_lambda.Architecture.X86_64,
+        environment: {
+          EMBEDDING_MODEL_BUCKET_NAME: ModelPackageBucket.bucketName,
+          SAGEMAKER_EXECUTION_ROLE: sagemakerPrincipalRole.roleArn,
+        },
+      }
+    );
+
+    new s3Deployment.BucketDeployment(
+      this,
+      props.resourcePrefix + "modelDeployment",
+      {
+        sources: [s3Deployment.Source.asset("../embeddings_model_file")],
+        destinationBucket: ModelPackageBucket,
+        prune: false,
+        memoryLimit: 10000,
+        ephemeralStorageSize: Size.gibibytes(10),
+      }
+    );
+
+    ModelHandlerFn.addEventSource(
+      new S3EventSource(ModelPackageBucket, {
+        events: [
+          s3.EventType.OBJECT_CREATED_PUT,
+          s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
+        ],
+      })
+    );
+
+    ModelHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
+        ],
+      })
+    );
+
+    ModelHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["sagemaker:CreateModel"],
+        resources: [`arn:aws:sagemaker:${awsRegion}:${awsAccountId}:model/*`],
+      })
+    );
+
+    ModelHandlerFn.addToRolePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: [
+          "sagemaker:CreateEndpoint",
+          "sagemaker:DeleteEndpoint",
+          "sagemaker:DescribeEndpoint",
+          "sagemaker:UpdateEndpoint",
+          "sagemaker:CreateEndpointConfig",
+          "sagemaker:DeleteEndpointConfig",
+          "sagemaker:DescribeEndpointConfig",
+        ],
+        resources: [
+          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint/*`,
+          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint-config/${endpoint_name}`,
+        ],
+      })
+    );
+
+    ModelHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["s3:ListBucket", "s3:CreateBucket"],
+        resources: [
+          `arn:aws:s3:::${ModelPackageBucket.bucketName}`,
+          `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}`,
+        ],
+      })
+    );
+
+    ModelHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:PutObjectAcl",
+          "s3:GetObjectVersion",
+        ],
+        resources: [
+          `arn:aws:s3:::${ModelPackageBucket.bucketName}/*`,
+          `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}/*`,
+        ],
+      })
+    );
+
+    ModelHandlerFn.addToRolePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: ["iam:PassRole", "sts:AssumeRole"],
+        resources: [sagemakerPrincipalRole.roleArn],
+      })
+    );
+
+    const insertDocumentHandlerFn = new lambdaPython.PythonFunction(
+      this,
+      props.resourcePrefix + "insertDocumentHandlerFn",
+      {
+        runtime: Runtime.PYTHON_3_9,
+        handler: "lambda_handler",
+        index: "lambda_function.py",
+        entry: "../api/insert-document",
+        timeout: cdk.Duration.minutes(3),
+        retryAttempts: 0,
+        memorySize: 2048,
+        architecture: cdk.aws_lambda.Architecture.X86_64,
+        environment: {
+          DOCUMENT_TABLE_NAME: documentTable.tableName,
+          OUTPUT_BUCKET_NAME: documentOutputBucket.bucketName,
+        },
+      }
+    );
+
+    new s3Deployment.BucketDeployment(
+      this,
+      props.resourcePrefix + "documentDeployment",
+      {
+        sources: [s3Deployment.Source.asset("../default_documents")],
+        destinationBucket: defaultDocumentBucket,
+        prune: false,
+        memoryLimit: 5000,
+        ephemeralStorageSize: Size.gibibytes(4),
+      }
+    );
+
+    insertDocumentHandlerFn.addEventSource(
+      new S3EventSource(defaultDocumentBucket, {
+        events: [
+          s3.EventType.OBJECT_CREATED_PUT,
+          s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
+        ],
+      })
+    );
+
+    insertDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
+        ],
+      })
+    );
+
+    insertDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:PutObject",
+          "s3:ReplicateObject",
+        ],
+        resources: [
+          `arn:aws:s3:::${documentOutputBucket.bucketName}/*`,
+          `arn:aws:s3:::${defaultDocumentBucket.bucketName}/*`,
+        ],
+      })
+    );
+
+    insertDocumentHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:PutItem"],
+        resources: [
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${documentTable.tableName}`,
+        ],
+      })
+    );
+
+    const chatHandlerFn = new lambdaPython.PythonFunction(
+      this,
+      props.resourcePrefix + "chatHandlerFn",
+      {
+        runtime: cdk.aws_lambda.Runtime.PYTHON_3_10,
+        handler: "lambda_handler",
+        index: "lambda_function.py",
+        entry: "../api/chat-handler",
+        timeout: cdk.Duration.minutes(15),
+        memorySize: 4096,
+        architecture: Architecture.ARM_64,
+        layers: [bedrockLangchainLayer],
+        environment: {
+          CONTEXT_TABLE_NAME: chatContextTable.tableName,
+          S3_ASSETS_BUCKET_NAME: documentOutputBucket.bucketName,
+          EMBEDDINGS_SAGEMAKER_ENDPOINT: endpoint_name,
+          AWS_INTERNAL: authentication,
+        },
+      }
+    );
+
+    chatHandlerFn.addPermission(
+      props.resourcePrefix + "chatHandlerPermission",
+      {
+        principal: cognito.authenticatedRole,
+        action: "lambda:InvokeFunctionUrl",
+      }
+    );
+
+    const chatHandlerUrl = chatHandlerFn.addFunctionUrl({
+      authType: cdk.aws_lambda.FunctionUrlAuthType.AWS_IAM,
+      cors: {
+        allowedOrigins: ["*"],
+        allowedMethods: [
+          cdk.aws_lambda.HttpMethod.GET,
+          cdk.aws_lambda.HttpMethod.POST,
+        ],
+        allowCredentials: false,
+        maxAge: cdk.Duration.minutes(10),
+        exposedHeaders: ["access-control-allow-origin"],
+        allowedHeaders: [
+          "authorization",
+          "content-type",
+          "origin",
+          "x-amz-date",
+          "x-api-key",
+          "x-amz-security-token",
+          "x-amz-user-agent",
+        ],
+      },
+    });
+
+    chatHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: [
+          `arn:aws:logs:${awsRegion}:${awsAccountId}:log-group:/aws/lambda/*`,
+        ],
+      })
+    );
+
+    chatHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["sagemaker:InvokeEndpoint"],
+        resources: [
+          `arn:aws:sagemaker:${awsRegion}:${awsAccountId}:endpoint/*`,
+        ],
+      })
+    );
+
+    chatHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["bedrock:InvokeModel"],
+        resources: ["*"],
+      })
+    );
+
+    chatHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:PutObjectAcl",
+          "s3:GetObjectVersion",
+        ],
+        resources: [`arn:aws:s3:::${documentOutputBucket.bucketName}/*`],
+      })
+    );
+
+    chatHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Scan",
+          "dynamodb:GetItem",
+        ],
+        resources: [
+          `arn:aws:dynamodb:${awsRegion}:${awsAccountId}:table/${chatContextTable.tableName}`,
+        ],
+      })
+    );
+
+    new AmplifyConfigLambdaConstruct(this, "AmplifyConfigFn", {
+      api: api.apiGatewayV2,
+      appClientId: cognito.webClientId,
+      identityPoolId: cognito.identityPoolId,
+      userPoolId: cognito.userPoolId,
+      documentInputBucketName: documentInputBucket.bucketName,
+      chatHandlerUrl: chatHandlerUrl.url,
+      apiUrl: api.apiGatewayV2.apiEndpoint,
+    });
   }
 }
