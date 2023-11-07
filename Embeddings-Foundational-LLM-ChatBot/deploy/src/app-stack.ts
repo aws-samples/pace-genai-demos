@@ -15,7 +15,6 @@
 
 // --
 // --  Author:        Jin Tan Ruan
-// --  Linkedin:      https://www.linkedin.com/in/ztanruan
 // --  Date:          04/11/2023
 // --  Purpose:       CDK Resources
 // --  Version:       0.1.0
@@ -59,11 +58,6 @@ export interface AppStackProps extends cdk.StackProps {
 }
 
 import { ApiGatewayV2LambdaConstruct } from "./constructs/apigatewayv2-lambda-construct";
-
-/**
- * AppStack for an S3 website and api gatewayv2 proxied through a CloudFront distribution
- *
- */
 
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
@@ -131,7 +125,7 @@ export class AppStack extends cdk.Stack {
       }
     );
 
-    const ModelPackageBucket = new s3.Bucket(
+    const modelPackageBucket = new s3.Bucket(
       this,
       props.resourcePrefix + "modelPackageBucket",
       {
@@ -790,7 +784,7 @@ export class AppStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["s3:ListBucket", "s3:CreateBucket"],
         resources: [
-          `arn:aws:s3:::${ModelPackageBucket.bucketName}`,
+          `arn:aws:s3:::${modelPackageBucket.bucketName}`,
           `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}`,
         ],
       })
@@ -807,7 +801,7 @@ export class AppStack extends cdk.Stack {
           "s3:GetObjectVersion",
         ],
         resources: [
-          `arn:aws:s3:::${ModelPackageBucket.bucketName}/*`,
+          `arn:aws:s3:::${modelPackageBucket.bucketName}/*`,
           `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}/*`,
         ],
       })
@@ -835,7 +829,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    const ModelHandlerFn = new lambdaPython.PythonFunction(
+    const modelHandlerFn = new lambdaPython.PythonFunction(
       this,
       props.resourcePrefix + "modelHandlerFn",
       {
@@ -848,7 +842,7 @@ export class AppStack extends cdk.Stack {
         memorySize: 4000,
         architecture: cdk.aws_lambda.Architecture.X86_64,
         environment: {
-          EMBEDDING_MODEL_BUCKET_NAME: ModelPackageBucket.bucketName,
+          EMBEDDING_MODEL_BUCKET_NAME: modelPackageBucket.bucketName,
           SAGEMAKER_EXECUTION_ROLE: sagemakerPrincipalRole.roleArn,
         },
       }
@@ -859,15 +853,15 @@ export class AppStack extends cdk.Stack {
       props.resourcePrefix + "modelDeployment",
       {
         sources: [s3Deployment.Source.asset("../embeddings_model_file")],
-        destinationBucket: ModelPackageBucket,
+        destinationBucket: modelPackageBucket,
         prune: false,
         memoryLimit: 10000,
         ephemeralStorageSize: Size.gibibytes(10),
       }
     );
 
-    ModelHandlerFn.addEventSource(
-      new S3EventSource(ModelPackageBucket, {
+    modelHandlerFn.addEventSource(
+      new S3EventSource(modelPackageBucket, {
         events: [
           s3.EventType.OBJECT_CREATED_PUT,
           s3.EventType.OBJECT_CREATED_COMPLETE_MULTIPART_UPLOAD,
@@ -875,7 +869,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    ModelHandlerFn.addToRolePolicy(
+    modelHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -889,7 +883,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    ModelHandlerFn.addToRolePolicy(
+    modelHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["sagemaker:CreateModel"],
@@ -897,7 +891,7 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    ModelHandlerFn.addToRolePolicy(
+    modelHandlerFn.addToRolePolicy(
       new cdk.aws_iam.PolicyStatement({
         effect: cdk.aws_iam.Effect.ALLOW,
         actions: [
@@ -916,18 +910,18 @@ export class AppStack extends cdk.Stack {
       })
     );
 
-    ModelHandlerFn.addToRolePolicy(
+    modelHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["s3:ListBucket", "s3:CreateBucket"],
         resources: [
-          `arn:aws:s3:::${ModelPackageBucket.bucketName}`,
+          `arn:aws:s3:::${modelPackageBucket.bucketName}`,
           `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}`,
         ],
       })
     );
 
-    ModelHandlerFn.addToRolePolicy(
+    modelHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
@@ -938,13 +932,13 @@ export class AppStack extends cdk.Stack {
           "s3:GetObjectVersion",
         ],
         resources: [
-          `arn:aws:s3:::${ModelPackageBucket.bucketName}/*`,
+          `arn:aws:s3:::${modelPackageBucket.bucketName}/*`,
           `arn:aws:s3:::sagemaker-${awsRegion}-${awsAccountId}/*`,
         ],
       })
     );
 
-    ModelHandlerFn.addToRolePolicy(
+    modelHandlerFn.addToRolePolicy(
       new cdk.aws_iam.PolicyStatement({
         effect: cdk.aws_iam.Effect.ALLOW,
         actions: ["iam:PassRole", "sts:AssumeRole"],

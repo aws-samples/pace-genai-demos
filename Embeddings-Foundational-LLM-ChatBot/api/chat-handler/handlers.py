@@ -13,6 +13,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# --
+# --  Author:        Jin Tan Ruan
+# --  Date:          04/11/2023
+# --  Purpose:       Callback Handler
+# --  Version:       0.1.0
+# --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+# --  History
+# --  When        Version     Who         What
+# --  -----------------------------------------------------------------
+# --  04/11/2023  0.1.0       jtanruan    Initial
+# --  -----------------------------------------------------------------
+# --
+
 from langchain.callbacks import StdOutCallbackHandler
 from langchain.schema import LLMResult
 from typing import Any, Dict, List

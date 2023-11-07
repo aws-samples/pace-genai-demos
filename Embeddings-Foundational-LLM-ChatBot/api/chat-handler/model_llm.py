@@ -15,9 +15,8 @@
 
 # --
 # --  Author:        Jin Tan Ruan
-# --  Linkedin:      https://www.linkedin.com/in/ztanruan
 # --  Date:          04/11/2023
-# --  Purpose:       Handle chatbot interaction
+# --  Purpose:       Handler Chatbot Interaction
 # --  Version:       0.1.0
 # --  Disclaimer:    This code is provided "as is" in accordance with the repository license
 # --  History
@@ -45,7 +44,7 @@ class LLM_Wrapper(LLM):
         stop: Optional[List[str]] = None,
         run_manager: Optional[CallbackManagerForLLMRun] = None,
     ) -> str:
-        """Call out to AI21's complete endpoint.
+        """Call out to model's complete endpoint.
 
         Args:
             prompt: The prompt to pass into the model.
@@ -57,7 +56,7 @@ class LLM_Wrapper(LLM):
         Example:
             .. code-block:: python
 
-                response = ai21("Tell me a joke.")
+                response = llm("Tell me a joke.")
         """
         # call the overriden method
         return self.base_llm._call(prompt, stop, run_manager).strip()

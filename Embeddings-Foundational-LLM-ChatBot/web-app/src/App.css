@@ -1,25 +1,32 @@
-.app {
+.app,
+.main-container {
   display: flex;
-  text-align: center;
   flex: 1;
-  border-bottom: #282c34;
+}
+
+.app {
+  text-align: center;
+  border-bottom: #282c34; /* This might be a mistake since it's missing "solid" and a width for the border. */
   margin-top: 10px;
   margin-bottom: 10px;
   align-self: center;
 }
 
-.cs-message-list .cs-typing-indicator {
+.cs-message-list {
   background-color: transparent !important;
+}
+
+.cs-message-list .cs-typing-indicator,
+.cs-chat-container .cs-message-input,
+.cs-main-container {
+  background-color: transparent !important;
+  border: 0;
 }
 
 .cs-message-list__scroll-wrapper {
   position: absolute;
   height: auto;
   overscroll-behavior-y: auto;
-}
-
-.cs-message-list {
-  background-color: #fafafa;
 }
 
 .cs-message__content-wrapper {
@@ -31,18 +38,9 @@
   pointer-events: none;
 }
 
-.main-container {
-  display: flex;
-  flex: 1;
-}
-
 .chat-container {
-  flex: 1;
-  display: flex;
   height: 100%;
   width: 700px;
-  border: 0px;
-  background-color: transparent;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -55,15 +53,7 @@
   margin: 1em 0 0 0;
 }
 
-.cs-chat-container .cs-message-input {
-  border: 0px;
-  background-color: transparent;
-}
-
-.cs-message-input__content-editor-container {
-  align-items: start;
-}
-
+.cs-message-input__content-editor-container,
 .cs-message-input__content-editor-container > * {
   align-items: start;
   text-align: left;
@@ -72,17 +62,12 @@
 }
 
 .cs-message__content {
-  border-radius: 0.7em 0.7em 0.7em 0.7em !important;
+  border-radius: 0.7em !important;
   background-color: #eee;
 }
 
 .cs-message--outgoing .cs-message__content {
   background-color: #c6e3fa;
-}
-
-.cs-main-container {
-  border: 0px;
-  background-color: transparent !important;
 }
 
 .footer {
@@ -94,7 +79,6 @@
 
 .app-header {
   background-color: #282c34;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;

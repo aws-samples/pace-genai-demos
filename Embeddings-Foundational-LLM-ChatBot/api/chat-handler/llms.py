@@ -13,6 +13,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# --
+# --  Author:        Jin Tan Ruan
+# --  Date:          04/11/2023
+# --  Purpose:       LLM Adapter
+# --  Version:       0.1.0
+# --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+# --  History
+# --  When        Version     Who         What
+# --  -----------------------------------------------------------------
+# --  04/11/2023  0.1.0       jtanruan    Initial
+# --  -----------------------------------------------------------------
+# --
+
 import json
 from typing import Any, Dict, List, Mapping, Optional
 from langchain.llms.base import LLM

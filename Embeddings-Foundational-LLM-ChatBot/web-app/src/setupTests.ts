@@ -13,14 +13,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// allows you to do things like:
-// expect(element).toHaveTextContent(/react/i)
-// learn more: https://github.com/testing-library/jest-dom
-
 // --
 // --  Author:        Jin Tan Ruan
-// --  Linkedin:      https://www.linkedin.com/in/ztanruan
 // --  Date:          04/11/2023
 // --  Purpose:       Test
 // --  Version:       0.1.0
@@ -31,5 +25,10 @@
 // --  04/11/2023  0.1.0       jtanruan    Initial
 // --  -----------------------------------------------------------------
 // --
+
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
 
 import "@testing-library/jest-dom";

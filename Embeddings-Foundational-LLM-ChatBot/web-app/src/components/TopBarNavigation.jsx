@@ -15,7 +15,6 @@
 
 // --
 // --  Author:        Jin Tan Ruan
-// --  Linkedin:      https://www.linkedin.com/in/ztanruan
 // --  Date:          04/11/2023
 // --  Purpose:       Top Navigation Component
 // --  Version:       0.1.0
@@ -48,12 +47,10 @@ export function TopBarNavigation() {
   const [darkMode, setDarkMode] = useState(false);
   const [user, setUser] = useState("");
   const [selectedDocument, setSelectedDocument] = useState(
-    "Amazon Annual Report"
+    "Amazon-Report-vectorstore"
   );
-  const [selectedEmbeddings, setSelectedEmbeddings] = useState("e5-large-V1");
-  const [selectedModel, setSelectedModel] = useState(
-    "AI21 Jurassic-2 Ultra V1"
-  );
+
+  const [selectedModel, setSelectedModel] = useState("Anthropic Claude V2");
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const setDarkLightTheme = () => {
@@ -162,6 +159,8 @@ export function TopBarNavigation() {
           .map((label) => ({
             id: label.id.S.replace(".pdf", ""),
             text: label.id.S.replace(".pdf", ""),
+            iconUrl:
+              "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg",
           }));
 
         setDocumentData(labelPairs);
@@ -182,6 +181,8 @@ export function TopBarNavigation() {
         .map((label) => ({
           id: label.id.S.replace(".pdf", ""),
           text: label.id.S.replace(".pdf", ""),
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg",
         }));
       setDocumentData(labelPairs);
     } catch (error) {
@@ -199,7 +200,6 @@ export function TopBarNavigation() {
       i18nStrings={i18nStrings}
       identity={{
         href: "/",
-
         title: "Guru",
         logo: {
           src: "guru.svg",
@@ -212,13 +212,15 @@ export function TopBarNavigation() {
           variant: "primary",
           text: "   New Chat",
           title: "   New Chat",
-          iconName: "contact",
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/f/f4/Papirus-64-apps-neochat.svg",
           onClick: () => onItemClickEventReset(),
         },
         {
           type: "menu-dropdown",
           text: selectedDocument,
-          iconName: "folder-open",
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/7/71/Notepad_icon.svg",
           onItemClick: (e) => onItemClickEventDocument(e),
           items: documentData.filter((item) => item.id !== selectedDocument),
         },
@@ -226,36 +228,42 @@ export function TopBarNavigation() {
         {
           type: "menu-dropdown",
           text: selectedModel,
-          iconName: "bug",
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/1/1b/Crystal_kbackgammon_engine.svg",
           onItemClick: (e) => onItemClickEventModel(e),
           items: [
             {
-              id: "AI21 Jurassic-2 Ultra V1",
-              text: "AI21 Jurassic-2 Ultra V1",
-            },
-            {
-              id: "AI21 Jurassic-2 Mid V1",
-              text: "AI21 Jurassic-2 Mid V1",
+              id: "Anthropic Claude V2",
+              text: "Anthropic Claude V2",
+              iconUrl:
+                "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
             },
             {
               id: "Anthropic Claude V1",
               text: "Anthropic Claude V1",
+              iconUrl:
+                "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
             },
             {
-              id: "Anthropic Claude V2",
-              text: "Anthropic Claude V2",
+              id: "AI21 Jurassic-2 Ultra V1",
+              text: "AI21 Jurassic-2 Ultra V1",
+              iconUrl:
+                "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
             },
             {
-              id: "Anthropic Claude Instant V1",
-              text: "Anthropic Claude Instant V1",
+              id: "AI21 Jurassic-2 Mid V1",
+              text: "AI21 Jurassic-2 Mid V1",
+              iconUrl:
+                "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
             },
           ].filter((item) => item.id !== selectedModel),
         },
         {
           type: "menu-dropdown",
           text: user,
-          iconName: "user-profile",
           description: user,
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/c/ce/User-info.svg",
           onItemClick: (e) => onItemClickEvent(e),
           items: [
             {
@@ -265,6 +273,8 @@ export function TopBarNavigation() {
                 {
                   id: "Upload Document",
                   text: "Upload Document",
+                  iconUrl:
+                    "https://upload.wikimedia.org/wikipedia/commons/e/e6/Upload.svg",
                   href: "/upload",
                 },
               ],
@@ -273,6 +283,8 @@ export function TopBarNavigation() {
               id: "signout",
               type: "button",
               variant: "primary",
+              iconUrl:
+                "https://upload.wikimedia.org/wikipedia/en/8/8c/Shutdown_button.svg",
               text: "Sign Out",
               title: "Sign Out",
             },

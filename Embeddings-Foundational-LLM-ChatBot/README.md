@@ -1,5 +1,9 @@
 # Guru Embeddings Foundational
 
+Author: Jin Tan Ruan<br>
+Date: 04/11/2023<br>
+Disclaimer: This code is provided "as is" in accordance with the repository license<br>
+
 This demo showcases hwo to implement a RAG workflow with custom embeddings model and FAISS to create state-of-the-art Generative AI conversational experiences over enterprise content. The demo supports document types such as PDF, TXT, HTML, XML, JSON, RTF, PPT (Only text content), DOCX (Only text content).
 
 This demo supports the following Amazon Bedrock and SageMaker JumpStart foundational base LLM Models.
@@ -10,6 +14,8 @@ This demo supports the following Amazon Bedrock and SageMaker JumpStart foundati
 - AI21 - Jurassic-2 Mid
 - SageMaker JumpStart Llama2 13B Chat (Optional)
 - SageMaker JumpStart Falcon 40B (Optional)
+
+![Embeddings Chatbot Architecture](./images/architecture.png)
 
 ## Prerequisites
 
@@ -39,7 +45,7 @@ Run the following commands at the root of the repo
 
 After the deployment is successful, follow these steps to get started on using the Chatbot
 
-1. Create a Cognito user - Run the following code to create a user within the Cognito UserPool. Refer to the output section of Cloudformation stack named **guru-embeddings-foundational**
+1. Create a Cognito user - Run the following code to create a user within the Cognito UserPool. Refer to the output section of Cloudformation stack named **guru-chatbot**
    to get the value of the **CognitoUserPoolId** key. Be sure to replace the parameter values before running the commands.
 
 ```bash
@@ -47,6 +53,18 @@ After the deployment is successful, follow these steps to get started on using t
     ./create-new-user.sh USER_POOL_ID USERNAME PASSWORD
 ```
 
-2. Login to the App. You will find the App Cloudfront URL in the output section of Cloudformation stack named **guru-embeddings-foundational**.
+2. Login to the App. You will find the App Cloudfront URL in the output section of Cloudformation stack named **guru-chatbot**.
+
+![Embeddings Chatbot Default](./images/Default.png)
 
 3. You are all set. You are now able to interact with the ChatBot. You can choose the LLM models from the drop down menu. Choosing an LLM model will create a new Chat session.
+
+![Embeddings Chatbot Home](./images/Home.png)
+
+4. Select **Upload Document**. Click **Choose file** to select document. Click on **Upload** to transfer them into S3.
+
+![Embeddings Chatbot Upload](./images/Upload.png)
+
+## Troubleshoot
+
+To ensure seamless processing, please refrain from uploading a new document until the current one has been fully processed. If you encounter issues with document handling, you may want to deploy the embedding model on a more robust instance such as ml.g5.12xlarge or ml.g5.24xlarge to improve performance. In the event of a document failure, attempt re-uploading the document before proceeding with further troubleshooting steps.

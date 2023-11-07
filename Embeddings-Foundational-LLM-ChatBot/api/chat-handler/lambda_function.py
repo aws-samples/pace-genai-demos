@@ -13,6 +13,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# --
+# --  Author:        Jin Tan Ruan
+# --  Date:          04/11/2023
+# --  Purpose:       Conversation Handler
+# --  Version:       0.1.0
+# --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+# --  History
+# --  When        Version     Who         What
+# --  -----------------------------------------------------------------
+# --  04/11/2023  0.1.0       jtanruan    Initial
+# --  -----------------------------------------------------------------
+# --
+
 import os
 import json
 import uuid
@@ -35,12 +48,14 @@ def lambda_handler(event, context):
         llm_type = body.get("llm_type", "amazon_api_gateway")
         vectorstore_key = body.get("vectorstore_key")
         bot_name = body.get("bot_name", "Guru")
+        model_id = body.get("model_id")
         conversation_id = uuid.uuid4().hex
 
         config = {
             "llm_type": llm_type,
             "vectorstore_key": vectorstore_key,
-            "bot_name": bot_name
+            "bot_name": bot_name,
+            "model_id": model_id
         }
 
         bot.save_config(conversation_id, config)
@@ -60,10 +75,10 @@ def lambda_handler(event, context):
         config["llm_type"],
         config["vectorstore_key"],
         config["bot_name"],
+        config["model_id"],
         memory=memory
     )
     
-
     qa_result = qa_chain({"question": question })
     answer = qa_result["answer"].strip()
     

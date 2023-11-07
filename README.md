@@ -12,6 +12,8 @@ This repository provides code samples for three Generative AI demos, licensed un
    knowledge base of LLMs. This synergy enables more accurate topic modeling, content
    recommendation, and semantic search capabilities.
 
+   ![Embeddings Foundational](images/Embeddings-Foundational.png)
+
 3. **Foundation Models Pharma Ad Generator**: A specialized application tailored for the
    pharmaceutical industry. Harnessing the generative capabilities of foundational models,
    this tool creates convincing and compliant pharmaceutical advertisements, ensuring

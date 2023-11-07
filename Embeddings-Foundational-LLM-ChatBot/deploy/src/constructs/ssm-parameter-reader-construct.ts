@@ -15,7 +15,6 @@
 
 // --
 // --  Author:        Jin Tan Ruan
-// --  Linkedin:      https://www.linkedin.com/in/ztanruan
 // --  Date:          04/11/2023
 // --  Purpose:       SSM parameter Construct
 // --  Version:       0.1.0

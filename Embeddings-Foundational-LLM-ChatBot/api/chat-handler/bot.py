@@ -13,6 +13,19 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# --
+# --  Author:        Jin Tan Ruan
+# --  Date:          04/11/2023
+# --  Purpose:       Model Arguments
+# --  Version:       0.1.0
+# --  Disclaimer:    This code is provided "as is" in accordance with the repository license
+# --  History
+# --  When        Version     Who         What
+# --  -----------------------------------------------------------------
+# --  04/11/2023  0.1.0       jtanruan    Initial
+# --  -----------------------------------------------------------------
+# --
+
 import pathlib
 import os
 import uuid
@@ -35,53 +48,40 @@ CONTEXT_TABLE_NAME = os.environ["CONTEXT_TABLE_NAME"]
 S3_ASSETS_BUCKET_NAME = os.environ["S3_ASSETS_BUCKET_NAME"]
 AWS_INTERNAL = os.environ["AWS_INTERNAL"]
 
-
 def get_model_args(model_id):   
-    if model_id == "Amazon-Titan-Large":
+
+    if model_id.startswith("anthropic"):
+
         question_llm_model_args = { 
-            "maxTokenCount": 1000, #4096
-            "stopSequences": [], 
-            "temperature": 0.0, 
-            "topP": 0.9 
+            "max_tokens_to_sample": 7000, 
+            "stop_sequences": [], 
+            "temperature": 0.2, 
+            "top_p": 0.9,
         }
 
         qa_llm_model_args = { 
-            "maxTokenCount": 1500, 
-            "stopSequences": [], 
-            "temperature": 0.0, 
-            "topP": 0.9 
-        }
-    elif model_id == "Anthropic-Claude-V2":
-        question_llm_model_args = { 
-            "max_tokens_to_sample": 1000, 
-            "stop_sequences": [], 
-            "temperature": 0.0, 
-            "top_p": 0.9 
+            "max_tokens_to_sample": 7000, 
+            "stop_sequences": ["Human", "Question", "Customer", "Guru"],
+            "temperature": 0.2, 
+            "top_p": 0.9,
         }
 
-        qa_llm_model_args = { 
-            "max_tokens_to_sample": 1500, 
-            "stop_sequences": [], 
-            "temperature": 0.0, 
-            "top_p": 0.9 
-        }
-    elif model_id == "ai21.j2-ultra":
+    else:
+
         question_llm_model_args = { 
-            "maxTokens": 4000, 
+            "maxTokens": 7000, 
             "stopSequences": [], 
             "temperature": 0.7,
             "numResults": 1,
         }
 
         qa_llm_model_args = { 
-            "maxTokens": 4000, 
-            "stopSequences": [], 
+            "maxTokens": 7000, 
+            "stopSequences": ["\n\nQuestion"], 
             "temperature": 0.7, 
             "numResults": 1,
        
         }
-    else:
-        raise NameError("Invalid Model Specified")
     
     return question_llm_model_args, qa_llm_model_args
 
@@ -142,7 +142,6 @@ def save_context(connection_id, qa_chain):
         }
     )
 
-
 def load_context(connection_id):
     # Retrieve pointer to existing context
     table = boto3.resource("dynamodb").Table(CONTEXT_TABLE_NAME)
@@ -195,16 +194,15 @@ def load_config(connection_id):
     return None
 
 
-def make_chain(connection_id, llm_type, vectorstore_key, bot_name, memory=None):
+def make_chain(connection_id, llm_type, vectorstore_key, bot_name, model_id, memory=None):
     """ Create a Q/A chain.
     """
 
     manager_q = CallbackManager([MyStdOutCallbackHandler()])
     manager = CallbackManager([MyStdOutCallbackHandler()])
-    modelId = "ai21.j2-ultra"
+    modelId = model_id
     question_llm_model_args, qa_llm_model_args = get_model_args(modelId)
 
-    
     llm_q = Bedrock(
         callback_manager=manager_q, model_id= modelId, model_kwargs=question_llm_model_args)
     llm = Bedrock(callback_manager=manager, model_id= modelId, model_kwargs=qa_llm_model_args)
@@ -218,20 +216,11 @@ def make_chain(connection_id, llm_type, vectorstore_key, bot_name, memory=None):
 
     print("Using LLM:", llm)
 
-    question_chain = LLMChain(llm=llm_q, prompt=get_question_prompt())
-
-    """
-    if llm_type == "openai":
-        # Use he default prompt, works well with OpenAI
-        document_chain = load_qa_chain(llm, chain_type="stuff", prompt=QA_PROMPT)
-    else:
-        # Use our own custom prompt, works well with AI21
-        document_chain = load_qa_chain(llm, chain_type="stuff", prompt=CUSTOM_QA_PROMPT)
-    """
+    question_chain = LLMChain(llm=llm_q, prompt=get_question_prompt(modelId))
 
     # Use a document chain with a customized prompt
     document_chain = load_qa_chain(
-        llm, chain_type="stuff", prompt=get_document_prompt(bot_name))
+        llm, chain_type="stuff", prompt=get_document_prompt(bot_name, modelId))
 
     if memory is None:
         memory = ConversationBufferMemory(

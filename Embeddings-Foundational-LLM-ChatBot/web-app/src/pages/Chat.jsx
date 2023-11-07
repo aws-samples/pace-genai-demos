@@ -15,7 +15,6 @@
 
 // --
 // --  Author:        Jin Tan Ruan
-// --  Linkedin:      https://www.linkedin.com/in/ztanruan
 // --  Date:          04/11/2023
 // --  Purpose:       Chat Component
 // --  Version:       0.1.0
@@ -74,9 +73,9 @@ export function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [conversationId, setConversationId] = useState("");
   const [knowledgeSource, setKnowledgeSource] = useState(
-    "aws-nltkV1-vectorstore.pkl.zip"
+    "Amazon-Report-vectorstore.pkl.zip"
   );
-  const [url, setUrl] = useState("api/ai21-ultra-v1");
+  const [model, setModel] = useState("anthropic.claude-v2");
 
   const [messages, setMessages] = useState([
     {
@@ -138,7 +137,7 @@ export function Chat() {
   }, [resetModel]);
 
   function resetDocument(value) {
-    if (value === "aws-nltkV1-vectorstore") {
+    if (value === "Amazon-Report-vectorstore") {
       setKnowledgeSource(value + ".pkl.zip");
     } else if (value) {
       setKnowledgeSource(value + "-vectorstore.pkl.zip");
@@ -148,20 +147,15 @@ export function Chat() {
   }
 
   function resetModel(value) {
+    console.log(value);
     if (value === "AI21 Jurassic-2 Ultra V1") {
-      setUrl("api/ai21-ultra-v1");
+      setModel("ai21.j2-ultra-v1");
     } else if (value === "AI21 Jurassic-2 Mid V1") {
-      setUrl("api/ai21-mid-v1");
+      setModel("ai21.j2-mid-v1");
     } else if (value === "Anthropic Claude V1") {
-      setUrl("api/anthropic-claude-v1");
+      setModel("anthropic.claude-v1");
     } else if (value === "Anthropic Claude V2") {
-      setUrl("api/anthropic-claude-v2");
-    } else if (value === "Anthropic Claude Instant V1") {
-      setUrl("api/anthropic-claude-instant-v1");
-    } else if (value === "Amazon Titan G1 Express Text") {
-      setUrl("api/amazon-titan-g1-express-text");
-    } else if (value === "Cohere Command Text") {
-      setUrl("api/cohere-command-text-claudev2");
+      setModel("anthropic.claude-v2");
     }
   }
 
@@ -207,6 +201,7 @@ export function Chat() {
       token: (await Auth.currentSession()).getIdToken().getJwtToken(),
       vectorstore_key: knowledgeSource,
       conversation_id: conversationId,
+      model_id: model,
     };
 
     async function retryAPICall(maxRetries = 4) {
@@ -215,7 +210,6 @@ export function Chat() {
       while (retries < maxRetries) {
         try {
           console.log(listMsg);
-
           const response = await API.post("chatApi", "", {
             body: listMsg,
           });
@@ -263,7 +257,14 @@ export function Chat() {
     if (avatarDefault) {
       return <Avatar src={"df-bot.png"} name={"Guru"}></Avatar>;
     } else {
-      return <Avatar src={"user.svg"} name={"User"}></Avatar>;
+      return (
+        <Avatar
+          src={
+            "https://upload.wikimedia.org/wikipedia/commons/1/12/User_icon_2.svg"
+          }
+          name={"User"}
+        ></Avatar>
+      );
     }
   }
 

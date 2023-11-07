@@ -17,7 +17,6 @@
 
 # --
 # --  Author:        Jin Tan Ruan
-# --  Linkedin:      https://www.linkedin.com/in/ztanruan
 # --  Date:          04/11/2023
 # --  Purpose:       Creates New User
 # --  Version:       0.1.0

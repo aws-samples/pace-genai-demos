@@ -29,16 +29,11 @@ import { Amplify, API, Auth, Storage } from "aws-amplify";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Box from "@cloudscape-design/components/box";
 import Icon from "@cloudscape-design/components/icon";
-import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
-import ThumbDownAltIcon from '@material-ui/icons/ThumbDownAlt';
+import ThumbUpAltIcon from "@material-ui/icons/ThumbUpAlt";
+import ThumbDownAltIcon from "@material-ui/icons/ThumbDownAlt";
 import Link from "@cloudscape-design/components/link";
 
-
-import {
-  Tooltip,
-  Typography,
-  CircularProgress
-} from "@material-ui/core";
+import { Tooltip, Typography, CircularProgress } from "@material-ui/core";
 
 export function Chat() {
   const ref = useRef(null);
@@ -47,15 +42,13 @@ export function Chat() {
   const [conversationId, setConversationId] = useState("");
   const [modelId, setModelId] = useState("Anthropic-Claude-V2");
 
- 
-
   const [messages, setMessages] = useState([
     {
       message: "Hello, I'm Guru! Ask me anything!",
       sentTime: "just now",
       sender: "Guru",
       sources: [],
-      pages: []
+      pages: [],
     },
   ]);
 
@@ -69,7 +62,7 @@ export function Chat() {
     return () => {
       setResetModelFunction(null);
     };
-  }, []);  
+  }, []);
 
   useEffect(() => {
     setResetChatFunction(resetChat);
@@ -95,7 +88,7 @@ export function Chat() {
         sentTime: "just now",
         sender: "Guru",
         sources: [],
-        pages: []
+        pages: [],
       },
     ]);
     setConversationId("");
@@ -110,13 +103,12 @@ export function Chat() {
   }, [resetModel]);
 
   const handleSend = async (message) => {
-    
     message = removeTags(message);
     const newMessage = {
       message,
       direction: "outgoing",
       sender: "User",
-      source_page: {}
+      source_page: {},
     };
     const newMessages = [...messages, newMessage];
     setMessages(newMessages);
@@ -152,39 +144,38 @@ export function Chat() {
       question: lastMessage,
       conversationId: conversationId,
       token: (await Auth.currentSession()).getIdToken().getJwtToken(),
-      model_id: modelId
+      model_id: modelId,
     };
 
     const getData = async () => {
-      try{
-          const response = await API.post("chatApi", "", {
-            body: listMsg
-          });
-        
-          setConversationId(response.conversationId);
-          setMessages([
-            ...chatMessages,
-            {
-              message: response.answer,
-              sender: "Guru",
-              source_page: response.source_page
-            },
-          ]);
-    }catch(e){
-      
-      setMessages([
-        ...chatMessages,
-        {
-          message: "Hmm, I'm experiencing problems processing this request. Please try later.",
-          sender: "Guru",
-          source_page: {}
-        },
-      ]);
-    }
-    finally{
-      setIsTyping(false);
-      setIsThinking(false);
-    }
+      try {
+        const response = await API.post("chatApi", "", {
+          body: listMsg,
+        });
+
+        setConversationId(response.conversationId);
+        setMessages([
+          ...chatMessages,
+          {
+            message: response.answer,
+            sender: "Guru",
+            source_page: response.source_page,
+          },
+        ]);
+      } catch (e) {
+        setMessages([
+          ...chatMessages,
+          {
+            message:
+              "Hmm, I'm experiencing problems processing this request. Please try later.",
+            sender: "Guru",
+            source_page: {},
+          },
+        ]);
+      } finally {
+        setIsTyping(false);
+        setIsThinking(false);
+      }
     };
 
     getData();
@@ -195,29 +186,39 @@ export function Chat() {
     if (avatarDefault) {
       return <Avatar src={"df-bot.png"} name={"Guru"}></Avatar>;
     } else {
-      return <Avatar src={"user.png"} name={"User"}></Avatar>;
+      return (
+        <Avatar
+          src={
+            "https://upload.wikimedia.org/wikipedia/commons/1/12/User_icon_2.svg"
+          }
+          name={"User"}
+        ></Avatar>
+      );
     }
   }
 
-  function mapSourceAndPage(message){
-    let items  = []
-      
-    Object.keys(message).map(key => {
-      if (key == "source_page"){
-        let source_page_obj = message[key]
-        Object.keys(source_page_obj).map(k => {
-          items.push(<SpaceBetween direction="vertical" size="xs" key={k}><SpaceBetween direction="horizontal" size="xs"><Icon name="file" size="small" />
-            <Link href={source_page_obj[k].file}>
-            {
-              source_page_obj[k].file_name
-            } 
-            </Link>
-            </SpaceBetween></SpaceBetween>)
-        })
-      }
-    })
+  function mapSourceAndPage(message) {
+    let items = [];
 
-    return items
+    Object.keys(message).map((key) => {
+      if (key == "source_page") {
+        let source_page_obj = message[key];
+        Object.keys(source_page_obj).map((k) => {
+          items.push(
+            <SpaceBetween direction="vertical" size="xs" key={k}>
+              <SpaceBetween direction="horizontal" size="xs">
+                <Icon name="file" size="small" />
+                <Link href={source_page_obj[k].file}>
+                  {source_page_obj[k].file_name}
+                </Link>
+              </SpaceBetween>
+            </SpaceBetween>
+          );
+        });
+      }
+    });
+
+    return items;
   }
 
   return (
@@ -246,11 +247,16 @@ export function Chat() {
                     <Message.CustomContent>
                       <SpaceBetween direction="vertical" size="xs">
                         {message.message}
-                        {message.sender === "Guru" && message.source_page && Object.keys(message.source_page).length > 0 &&
-                          <ExpandableSection defaultExpanded headerText="Sources (by relevance)">
-                            {mapSourceAndPage(message)}
-                          </ExpandableSection>
-                        }
+                        {message.sender === "Guru" &&
+                          message.source_page &&
+                          Object.keys(message.source_page).length > 0 && (
+                            <ExpandableSection
+                              defaultExpanded
+                              headerText="Sources (by relevance)"
+                            >
+                              {mapSourceAndPage(message)}
+                            </ExpandableSection>
+                          )}
                       </SpaceBetween>
                     </Message.CustomContent>
                   </Message>

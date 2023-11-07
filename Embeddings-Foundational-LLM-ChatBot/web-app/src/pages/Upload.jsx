@@ -15,7 +15,6 @@
 
 // --
 // --  Author:        Jin Tan Ruan
-// --  Linkedin:      https://www.linkedin.com/in/ztanruan
 // --  Date:          04/11/2023
 // --  Purpose:       Upload Component
 // --  Version:       0.1.0
@@ -230,11 +229,10 @@ export function Upload() {
         <Container header={<Header variant="h2">Upload Document</Header>}>
           <SpaceBetween size="xl">
             <TextContent>
-              Upload a document into S3 to be ingested by the embeddings model.
-              Limitations: Only text PDF documents are supported. A maximum of
-              up to 10MB can be processed. This is an artifical limitation
-              imposed for the demo. The model will only respond with answers
-              from within the document.
+              Upload a document to S3 for processing by the embeddings model.
+              Restrictions: Only PDF, CSV, DOC, and TXT formats are accepted.
+              Before uploading, ensure the document has a recognizable name.
+              Please use a brief name and eliminate any special characters.
             </TextContent>
 
             <FileUpload
@@ -271,7 +269,7 @@ export function Upload() {
               <Button
                 iconAlign="left"
                 onClick={handleUpload}
-                iconName="upload-download"
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/9/98/Farm-Fresh_saved_imports.png"
               >
                 Upload
               </Button>
@@ -279,7 +277,7 @@ export function Upload() {
                 onClick={onSyncRunRefresh}
                 variant="primary"
                 iconAlign="left"
-                iconName="refresh"
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/4/4e/View-refresh-red.svg"
               >
                 Refresh
               </Button>
