@@ -112,15 +112,18 @@ export function TopBarNavigation() {
           variant: "primary",
           text: "   Upload Document",
           title: "   Upload Document",
-          iconName: "folder-open",
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/e/e6/Upload.svg",
           href: "/upload",
         },
 
         {
           type: "button",
           variant: "primary",
-          iconName: "multiscreen",
           onClick: () => setDarkLightTheme(),
+          iconUrl: darkMode
+            ? "https://upload.wikimedia.org/wikipedia/commons/0/08/Weather_icon_-_sunny.svg"
+            : "https://upload.wikimedia.org/wikipedia/commons/7/72/Gnome-weather-clear-night.svg",
           text: darkMode ? "   Light Mode" : "   Dark Mode",
           title: darkMode ? "   Light Mode" : "   Dark Mode",
         },
@@ -129,13 +132,16 @@ export function TopBarNavigation() {
           type: "menu-dropdown",
           text: user,
           description: user,
-          iconName: "user-profile",
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/c/ce/User-info.svg",
           onItemClick: (e) => onItemClickEvent(e),
           items: [
             {
               id: "signout",
               type: "button",
               variant: "primary",
+              iconUrl:
+                "https://upload.wikimedia.org/wikipedia/en/8/8c/Shutdown_button.svg",
               text: "Sign Out",
               title: "Sign Out",
             },

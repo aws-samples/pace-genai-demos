@@ -297,13 +297,17 @@ export function Upload() {
           variant="h2"
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              <Button iconAlign="left" onClick={handleUpload}>
+              <Button
+                iconAlign="left"
+                onClick={handleUpload}
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/9/98/Farm-Fresh_saved_imports.png"
+              >
                 Upload
               </Button>
               <Button
                 onClick={onSyncRunRefresh}
                 variant="primary"
-                iconName="refresh"
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/4/4e/View-refresh-red.svg"
               >
                 Refresh
               </Button>

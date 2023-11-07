@@ -111,59 +111,93 @@ export function HomeView() {
   const locationList = [
     {
       value: "Australia",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "Brazil",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "Canada",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "Chile",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
 
     {
       value: "Colombia",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "France",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "Germany",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "Italy",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "Mexico",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "New Zealand",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
     {
       value: "United Kingdom",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
 
     {
       value: "United States",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/f3/Gnome-globe.svg",
     },
   ];
 
   const complianceList = [
     {
       value: "FDA Compliance (U.S.)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/4/4b/Gartoon_actions_tool_clipboard.svg",
     },
     {
       value: "EMA Compliance (Europe)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/4/4b/Gartoon_actions_tool_clipboard.svg",
     },
     {
       value: "Health Canada (Canada)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/4/4b/Gartoon_actions_tool_clipboard.svg",
     },
     {
       value: "TGA Compliance (Australia)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/4/4b/Gartoon_actions_tool_clipboard.svg",
     },
     {
       value: "None/Other",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/4/4b/Gartoon_actions_tool_clipboard.svg",
     },
   ];
 
@@ -171,94 +205,141 @@ export function HomeView() {
     {
       id: "Adolescents",
       value: "Adolescents (13-18 years)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/ac/Bimetrical_icon_person.svg",
     },
     {
       id: "Young Adults",
       value: "Young Adults (19-35 years)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/ac/Bimetrical_icon_person.svg",
     },
     {
       id: "Middle-Aged",
       value: "Middle-Aged (36-60 years)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/ac/Bimetrical_icon_person.svg",
     },
     {
       id: "Elderly Patients",
       value: "Elderly Patients (60+ years)",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/ac/Bimetrical_icon_person.svg",
     },
   ];
 
   const toneList = [
     {
       value: "Informative",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/2/2a/Sound_workshop.svg",
     },
     {
       value: "Emotional",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/2/2a/Sound_workshop.svg",
     },
     {
       value: "Empowering",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/2/2a/Sound_workshop.svg",
     },
     {
       value: "Uplifting",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/2/2a/Sound_workshop.svg",
     },
     {
       value: "Serious",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/2/2a/Sound_workshop.svg",
     },
   ];
 
   const platformList = [
     {
       value: "Brochures",
+      iconUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Essay.svg",
     },
     {
       value: "Print Poster",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/4/4e/Document-open_Gion.svg",
     },
     {
       value: "Facebook",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/f/fb/Facebook_icon_2013.svg",
     },
     {
       value: "Instagram",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/9/95/Instagram_logo_2022.svg",
     },
 
     {
-      value: "Twitter",
+      value: "X",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/e/e6/Twitter-new-logo.jpg",
     },
     {
       value: "LinkedLn",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/e/e9/Linkedin_icon.svg",
     },
     {
       value: "Google Ads",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/cc/Google_Ads_icon.svg",
     },
   ];
 
   const objectivesList = [
     {
       value: "Product Launch",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/e/e2/Target-iso-color.png",
     },
     {
       value: "Brand Awareness",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/e/e2/Target-iso-color.png",
     },
     {
       value: "Patient Education",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/e/e2/Target-iso-color.png",
     },
   ];
 
   const imageStyleList = [
     {
       value: "Analog-film",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c4/Gnome-dev-camera.svg",
     },
 
     {
       value: "Cinematic",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c4/Gnome-dev-camera.svg",
     },
 
     {
       value: "Digital-art",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c4/Gnome-dev-camera.svg",
     },
     {
       value: "Enhance",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c4/Gnome-dev-camera.svg",
     },
 
     {
       value: "Photographic",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c4/Gnome-dev-camera.svg",
     },
   ];
 
@@ -266,42 +347,62 @@ export function HomeView() {
     {
       id: "anthropic.claude-v2",
       value: "Anthropic Claude V2",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
     },
     {
       id: "anthropic.claude-v1",
       value: "Anthropic Claude V1",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
     },
     {
       id: "ai21.j2-ultra-v1",
       value: "AI21 Jurassic-2 Ultra V1",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
     },
     {
       id: "ai21.j2-mid-v1",
       value: "AI21 Jurassic-2 Mid V1",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/a/a3/Tools_nicu_buculei_01.svg",
     },
   ]);
 
   const [textModelTemperatureList, setTextModelTemperatureList] = useState([
     {
       value: "Low",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c7/Temp_HotSR.png",
     },
     {
       value: "Medium",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c7/Temp_HotSR.png",
     },
     {
       value: "High",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c7/Temp_HotSR.png",
     },
   ]);
 
   const [imageModelStrengthList, setImageModelStrengthLists] = useState([
     {
       value: "Low",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/1/1e/Emblem-photos.svg",
     },
     {
       value: "Medium",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/1/1e/Emblem-photos.svg",
     },
     {
       value: "High",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/1/1e/Emblem-photos.svg",
     },
   ]);
 
@@ -309,6 +410,8 @@ export function HomeView() {
     {
       id: "stability.stable-diffusion-xl-v0",
       value: "Stable Diffusion XL",
+      iconUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/c/c2/Crystal128-tool-brush.svg",
     },
   ]);
 
@@ -432,6 +535,8 @@ export function HomeView() {
         response.map((result) => ({
           id: result.id,
           value: result.id.replace("reference-specifications/", ""),
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg",
         }))
       );
 
@@ -440,6 +545,8 @@ export function HomeView() {
         imagesResponse.results.map((result) => ({
           id: result.key,
           value: result.key.replace("reference-images/", ""),
+          iconUrl:
+            "https://upload.wikimedia.org/wikipedia/commons/b/bc/Camera-n--redbrush-pd.svg",
         }))
       );
     }
@@ -917,14 +1024,17 @@ export function HomeView() {
           variant="h2"
           actions={
             <SpaceBetween direction="horizontal" size="xs">
-              <Button onClick={allFieldsReset} iconName="redo">
+              <Button
+                onClick={allFieldsReset}
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/0/05/Gtk-undo-ltr.svg"
+              >
                 Reset
               </Button>
               <Button
                 disabled={buttonDisabled}
                 variant="primary"
                 onClick={handleTextGenerationButtonClick}
-                iconName="insert-row"
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/e/ef/Inkscape_icons_free-hand-draw.svg"
               >
                 Generate Description
               </Button>
@@ -932,7 +1042,7 @@ export function HomeView() {
                 disabled={buttonDisabled}
                 variant="primary"
                 onClick={handleImageGenerationButtonClick}
-                iconName="copy"
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/5/51/Farm-Fresh_picture_edit.png"
               >
                 Generate Image
               </Button>
@@ -940,7 +1050,7 @@ export function HomeView() {
                 disabled={buttonDisabled}
                 variant="primary"
                 onClick={handleSubmitButtonClick}
-                iconName="file"
+                iconUrl="https://upload.wikimedia.org/wikipedia/commons/f/f1/Gnome-colors-edit-select-all.svg"
               >
                 Generate Advertisement
               </Button>
