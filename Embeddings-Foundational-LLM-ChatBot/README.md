@@ -55,15 +55,15 @@ After the deployment is successful, follow these steps to get started on using t
 
 2. Login to the App. You will find the App Cloudfront URL in the output section of Cloudformation stack named **guru-chatbot**.
 
-![Embeddings Chatbot Default](./images/Default.png)
+![Embeddings Chatbot Default](./images/home.png)
 
 3. You are all set. You are now able to interact with the ChatBot. You can choose the LLM models from the drop down menu. Choosing an LLM model will create a new Chat session.
 
-![Embeddings Chatbot Home](./images/Home.png)
+![Embeddings Chatbot Home](./images/chat.png)
 
 4. Select **Upload Document**. Click **Choose file** to select document. Click on **Upload** to transfer them into S3.
 
-![Embeddings Chatbot Upload](./images/Upload.png)
+![Embeddings Chatbot Upload](./images/upload.png)
 
 ## Troubleshoot
 
