@@ -26,7 +26,7 @@ This demo supports the following Amazon Bedrock and SageMaker JumpStart foundati
 
 ## Deployment
 
-:information_source: **The deployment time ranges from 35-40 minutes.**
+**The deployment time ranges from 35-40 minutes.**
 
 The instructions assume that this solution will be deployed from a terminal running from Linux or MacOS. The instructions should also work from a POSIX terminal running from Windows, assuming that it includes the standard GNU tools.
 Run the following commands at the root of the repo
