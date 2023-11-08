@@ -134,13 +134,19 @@ def lambda_handler(event, context):
         }
 
 def should_source_be_included(ans):
-    answer = ans.lower()
-    words_with_no_source = ["unfortunately", "i do not have", "i'm sorry", "i do not see", "i did not find", "avoid profanity"]
+    
     include = True
-    for substring in words_with_no_source:
-        if substring in answer:
-            include = False
-            break
+    if ans:
+        answer = ans.lower()
+        words_with_no_source = ["unfortunately", "i do not have", "i'm sorry", "i do not see", "i did not find", "avoid profanity"]
+        
+        for substring in words_with_no_source:
+            if substring in answer:
+                include = False
+                break
+    else:
+        return False
+        
     return include
 
 def get_relevant_doc_names(relevant_documents):
