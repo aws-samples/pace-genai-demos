@@ -1,21 +1,16 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-
-from langchain.prompts.prompt import PromptTemplate
-
-def get_claude_document_prompt(bot_name):
-
+def get_claude_document_prompt(question, context):
     
-    
-    document_prompt_template = """\n\nHuman: You will be acting as a AI customer success agent named {bot_name}.
+    document_prompt_template = f"""\n\nHuman: You will be acting as a AI customer success agent.
     I'd like you to provide a verbose answer to the question using facts from the quoted content. Here is the document:
 
     <document>
-    {{context}}
+    {context}
     </document>
 
-    Here is the question: {{question}}
+    Here is the question: {question}
 
     Here are some important rules for the interaction:
     - Only answer questions that are covered in the document
@@ -31,19 +26,7 @@ def get_claude_document_prompt(bot_name):
 
     \n\nAssistant:"""
 
-    template_with_name = document_prompt_template.format(bot_name=bot_name)
-    return PromptTemplate(
-        template=template_with_name, input_variables=["context", "question"]
-    )
+    return document_prompt_template
 
 
 
-def get_claude_question_prompt():
-    question_prompt_template = """{chat_history}
-    Answer only with the new question.
-    
-    \n\nHuman: How would you ask the question considering the previous conversation: {question}
-    
-    \n\nAssistant: Question:"""
-
-    return PromptTemplate.from_template(question_prompt_template)

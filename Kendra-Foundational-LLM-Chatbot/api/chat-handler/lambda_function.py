@@ -1,23 +1,29 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
+"""
+Copyright 2023 Amazon.com, Inc. and its affiliates. All Rights Reserved.
+
+Licensed under the Amazon Software License (the "License").
+You may not use this file except in compliance with the License.
+A copy of the License is located at
+
+  http://aws.amazon.com/asl/
+
+or in the "license" file accompanying this file. This file is distributed
+on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+express or implied. See the License for the specific language governing
+permissions and limitations under the License.
+"""
 
 import json
 import uuid
 import os
 import boto3
-from langchain.chains import ConversationalRetrievalChain
-from langchain.chains.llm import LLMChain
-from langchain.chains.question_answering import load_qa_chain
-#from kendra_retriever import AmazonKendraRetriever
-from langchain.retrievers import AmazonKendraRetriever
-#from chat_message_history import DynamoDBChatMessageHistory
 from prompts_factory import get_prompts
-from llm_factory import get_bedrock_llms
+from llm_factory import get_model_id, get_model_args
 from botocore.config import Config
 import urllib.parse
-from langchain.memory.chat_message_histories import DynamoDBChatMessageHistory
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts.prompt import PromptTemplate
+
+
+config = Config(connect_timeout=5, read_timeout=60, retries={"total_max_attempts": 20, "mode": "adaptive"})
 
 CHAT_MESSAGE_HISTORY_TABLE_NAME = os.environ["CHAT_MESSAGE_HISTORY_TABLE_NAME"]
 AWS_INTERNAL = os.environ["AWS_INTERNAL"]
@@ -33,17 +39,36 @@ kendra_index_id = os.environ["KENDRA_INDEX_ID"]
 NO_OF_PASSAGES_PER_PAGE = os.environ["NO_OF_PASSAGES_PER_PAGE"]
 NO_OF_SOURCES_TO_LIST = os.environ["NO_OF_SOURCES_TO_LIST"]
 
+bedrock = boto3.client(
+                service_name='bedrock-runtime',
+                region_name=region,
+                endpoint_url=f'https://bedrock-runtime.{region}.amazonaws.com',
+                                    config=config)
+
+
+kendra_client = boto3.client("kendra")
+
+def get_context(question, jwt_token):
+   
+    kargs = {
+        "IndexId": kendra_index_id,
+        "QueryText": question.strip(),
+        "PageSize": int(NO_OF_PASSAGES_PER_PAGE),
+        "UserContext": {
+                        'Token':jwt_token
+                }
+    }
+    return kendra_client.retrieve(**kargs)
 
 def lambda_handler(event, context):
     try:
-        _ = context
-        print(event)
-
         # ConversationId is the SessionId
         body = event.get("body", "{}")
         body = json.loads(body)
-
+        
         model_id = body.get("model_id")
+        modelId = get_model_id(model_id)
+        
         conversation_id = body.get("conversationId")
         jwt_token = body.get("token")
         
@@ -53,17 +78,29 @@ def lambda_handler(event, context):
             conversation_id = uuid.uuid4().hex
         
         # Run question through chain
-        question = body["question"]
-        print(f"body['question']={question}")
-        qa_chain, kendra_retriever = build_chain(model_id, jwt_token, question, conversation_id)
-        print(f"kendra_retriever.metadata={kendra_retriever.metadata}")
-        # Only use the AI responded Message History for running the chain
-        qa_result = run_chain(qa_chain, question)
+        question = body["question"].strip().replace("?","")
         
-        print(f"qa_result={qa_result}")
-        answer = qa_result["answer"].strip()
-        print(f"answer = {answer}")
-        source_page_info = get_relevant_doc_names(qa_result)
+        # Fetch Kendra Semantic Search results
+        relevant_documents = get_context(question, jwt_token)
+        source_page_info = get_relevant_doc_names(relevant_documents)
+        
+        document_prompt = get_prompts(model_id, question, relevant_documents)
+        question_llm_model_args, document_llm_model_args = get_model_args(model_id, document_prompt)
+        
+        body = json.dumps(document_llm_model_args)
+        print(f"body={body}")
+        accept = "*/*"
+        contentType = "application/json"
+        print(f"modelId={modelId}")
+        
+
+
+        content = bedrock.invoke_model(
+            body=body, modelId=modelId, accept=accept, contentType=contentType
+        )
+        response = json.loads(content.get("body").read())
+        answer = response.get("completion")
+        print(answer)
 
         body = {
             "source_page": source_page_info if should_source_be_included(answer) else [],
@@ -106,14 +143,14 @@ def should_source_be_included(ans):
             break
     return include
 
-def get_relevant_doc_names(qa_result):
+def get_relevant_doc_names(relevant_documents):
     sources = []
     doc_names = []
-
-    if 'source_documents' in qa_result:
-        for d in qa_result['source_documents']:
-            sources.append(d.metadata['source'])
-
+    
+    if 'ResultItems' in relevant_documents:
+        for doc in relevant_documents['ResultItems']:
+            sources.append(doc["DocumentId"])
+    
     if sources:
         source_groups_weight_dict = get_doc_uri(sources)
         print(f"source_groups_weight_dict={source_groups_weight_dict}")
@@ -128,7 +165,6 @@ def get_relevant_doc_names(qa_result):
 
 def get_source_file_name(source):
     parts = source.split("/")
-    # returns Annual-Report.pdf
     return parts[len(parts)-1:][0]
 
 def get_doc_uri(sources):
@@ -140,50 +176,10 @@ def get_doc_uri(sources):
             res[source] += 1
     return res
 
-
-def get_kendra_metadata(conversation_id):
-    session_table = ddb_client.Table(CHAT_MESSAGE_HISTORY_TABLE_NAME)
-    response = session_table.get_item(Key={"SessionId": conversation_id})
-    if response and "Item" in response:
-        if 'KendraMetadata' in response['Item']:
-            return response["Item"]['KendraMetadata']
-    return {}
-
-def run_chain(chain, prompt: str, history=[]):
-    return chain({"question": prompt})
-
-def build_chain(model_id, jwt_token, question, session_id):
-    
-    llm_q, llm = get_bedrock_llms(model_id)
-    question_prompt, document_prompt = get_prompts(model_id)
-    
-    question_chain = LLMChain(llm=llm_q, prompt=question_prompt)
-    print(f"This is question chain={question_chain}")
-
-    document_chain = load_qa_chain(llm, chain_type='stuff', prompt=document_prompt)
-    kendra_retriever = AmazonKendraRetriever(
-                                                index_id=kendra_index_id,
-                                                top_k=int(NO_OF_PASSAGES_PER_PAGE),
-                                                user_context={
-                                                    'Token':jwt_token
-                                            })
-    message_history = DynamoDBChatMessageHistory(table_name=CHAT_MESSAGE_HISTORY_TABLE_NAME, session_id=session_id)
-    memory = ConversationBufferMemory(
-        memory_key="chat_history", chat_memory=message_history, output_key='answer', return_messages=True
-    )
-    qa_chain = ConversationalRetrievalChain(
-        retriever=kendra_retriever,
-        combine_docs_chain=document_chain,
-        question_generator=question_chain,
-        memory=memory,
-        return_source_documents=True
-    )
-    return qa_chain, kendra_retriever
-
 def get_presigned_url(s3_file_path):
         parts = s3_file_path.split("/")
-        bucket = parts[3]
-        key = '/'.join(parts[4:])
+        bucket = parts[2]
+        key = '/'.join(parts[3:])
         
         s3 = boto3.client('s3', config=Config(signature_version='s3v4', s3={'addressing_style': 'virtual'}))
         response = s3.generate_presigned_url(
@@ -192,7 +188,6 @@ def get_presigned_url(s3_file_path):
                 'Bucket': bucket,
                 'Key': key
             },
-            ExpiresIn=300
+            ExpiresIn=30000
         )
         return response
-
