@@ -33,7 +33,7 @@ Run the following commands at the root of the repo
 
 ```bash
     chmod +x setup-model.sh
-    ./deploy.sh
+    ./setup-model.sh
 ```
 
 ```bash
