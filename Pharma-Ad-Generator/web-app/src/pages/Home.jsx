@@ -516,15 +516,21 @@ export function HomeView() {
 
   const updateType0Content = (message) => {
     setImage(message["image_content"]);
-    setSummary(message["summary"]);
-    setTitle(message["title"]);
-    streamContent(message["title"], message["summary"]);
+    setSummary(message["summary"].replace(/^"|"$/g, ""));
+    setTitle(message["title"].replace(/^"|"$/g, ""));
+    streamContent(
+      message["title"].replace(/^"|"$/g, ""),
+      message["summary"].replace(/^"|"$/g, "")
+    );
   };
 
   const updateType1Content = (message) => {
-    setSummary(message["summary"]);
-    setTitle(message["title"]);
-    streamContent(message["title"], message["summary"]);
+    setSummary(message["summary"].replace(/^"|"$/g, ""));
+    setTitle(message["title"].replace(/^"|"$/g, ""));
+    streamContent(
+      message["title"].replace(/^"|"$/g, ""),
+      message["summary"].replace(/^"|"$/g, "")
+    );
   };
 
   useEffect(() => {

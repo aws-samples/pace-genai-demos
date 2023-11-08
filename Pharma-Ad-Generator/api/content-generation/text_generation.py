@@ -130,21 +130,13 @@ def get_summary(compliance, document, brand_name, language, model_id, temperatur
                 \n\nHuman: "You are a Marketing Specialist with a focus on writing compliant marketing content. 
                 You are tasked with creating marketing content for a therapeutic product named {brand_name} with the objective of {objectives}. 
                 I will provide a description of the therapeutic product between <description></description> tags. 
-                Based on this description create a post limited to 150 words in {language} for a {platform} post targeting {audience}. 
+                Based on this description create a post in 4 sentences in {language} for a {platform} post targeting {audience}. 
                 The content should be written in a {toneStyle} tone. Describe the product benefits, reasons people should consider using it, and detail any potential side effects or warnings. 
-                Conclude with an encouragement for readers to consult their doctor about the product.
-        
+                Conclude with an encouragement for readers to consult their doctor about the product. Do not include any on these instruction, ask for feedback, include XML tags, or reproduce content verbatim.
+                
                 <description>
                 {document}
                 </description>                    
-
-                \n\nAssistant: Just to confirm, you want a post for {platform} in {language} that delves into the product's benefits, 
-                reasons for its use, and any side effects, resonating with the objectives of {objectives}. 
-                This content is intended for {audience} on {platform} and should adopt a {toneStyle} tone. 
-                I'll ensure not to directly quote the provided content or use XML tags. My response will be strictly the drug ad description. Have I got that right?
-
-                \n\nHuman: Exactly. Ensure the description doesn't exceed 150 words. Use only the details from the provided document to create the ad. 
-                The ad shouldn't reference any instruction, ask for feedback, include XML tags, or reproduce content verbatim. Only provide the drug ad content.
 
                 \n\nAssistant: Here's the description for the product: """
             
@@ -154,23 +146,14 @@ def get_summary(compliance, document, brand_name, language, model_id, temperatur
 
                 Question: As a Marketing Specialist focusing on compliant marketing content, you have the following task: 
                 For the therapeutic product named {brand_name} with the goal of {objectives}, I will supply a product description enclosed within <description></description> tags. 
-                From this, devise a post limited to 150 words in {language} for a {platform} post targeting {audience}.  
+                From this, devise a post in 4 sentences in {language} for a {platform} post targeting {audience}.  
                 The write-up should exude a {toneStyle} tone. Elaborate on the product's advantages, why it's a viable choice, and any possible side effects or cautions. 
-                End by urging readers to discuss the product with their physician. Remove double quotes from the post. Make sure the content aligns with the typical style conventions of {platform}.
+                End by urging readers to discuss the product with their physician. Make sure the content aligns with the typical style conventions of {platform}.
 
                 <description>
                 {document}
                 </description> 
 
-                Answer: To ensure clarity: You're asking for a post written in {language} for {platform}, discussing the benefits, usage reasons, and potential risks of {brand_name}. 
-                This post, intended for {audience}, should mirror the objectives of {objectives} and maintain a {toneStyle} tone. 
-                Avoid referencing instructions, copying content verbatim, or including quotations and titles in the drug ad. 
-                Do not solicit feedback. Provide only the generated drug ad text. Have I captured your requirements accurately?
-
-                Question: Exactly. The description should be limited to 150 words. Use only the information provided in the document for the ad's content. 
-                Do not reference instructions, ask for feedback, include XML tags, or directly copy content. 
-                Exclude any quotations symbols, and provide only the text for the drug ad.
-                
                 Answer: Here is the drug ad description of the product: """
 
 
@@ -183,23 +166,14 @@ def get_summary(compliance, document, brand_name, language, model_id, temperatur
                 \n\nHuman: "You are a Marketing Specialist with a focus on writing compliant marketing content. 
                 You are tasked with creating marketing content for a therapeutic product named {brand_name} with the objective of {objectives}. 
                 I will provide a description of the therapeutic product between <description></description> tags. 
-                Based on this description, create a post limited to 150 words in {language} for a {platform} post targeting {audience}. 
+                Based on this description, create a post in 4 sentences in {language} for a {platform} post targeting {audience}. 
                 The content should be written in a {toneStyle} tone, adhere to {compliance} rules, and be tailored to {platform}'s style. 
                 Describe the product benefits, reasons people should consider using it, and detail any potential side effects or warnings. 
-                Conclude with an encouragement for readers to consult their doctor about the product.
+                Conclude with an encouragement for readers to consult their doctor about the product. Do not include any on these instruction, ask for feedback, include XML tags, or reproduce content verbatim.
 
                 <description>
                 {document}
                 </description>                    
-
-                \n\nAssistant: Just to confirm, you want a post for {platform} in {language} that delves into the product's benefits, 
-                reasons for its use, and any side effects, resonating with the objectives of {objectives}.
-                This content is intended for {audience} on {platform}, should adopt a {toneStyle} tone, and must follow the {compliance} rules.
-                I'll ensure not to directly quote the provided content or use XML tags. My response will be strictly the drug ad description. Have I captured your requirements correctly?
-
-                \n\nHuman: Exactly. Ensure the description doesn't exceed 150 words. Use only the details from the provided document to create the ad.
-                The content should be written in a {toneStyle} tone and adhere to {compliance} rules, and be tailored to the unique style of {platform}.
-                The ad shouldn't reference any instruction, ask for feedback, include XML tags, or reproduce content verbatim. Only provide the drug ad content.
 
                 \n\nAssistant: Here is your drug ad, tailored to {platform}'s style, in accordance with {compliance} rules:"""
                     
@@ -208,22 +182,11 @@ def get_summary(compliance, document, brand_name, language, model_id, temperatur
             prompt = f"""
 
                 Question: You are a Marketing Specialist with a focus on writing compliant marketing content. 
-                For the therapeutic product {brand_name}, create a post limited to 150 words in {language} for {platform} targeting {audience}. 
+                For the therapeutic product {brand_name}, create a post in 4 sentences in {language} for {platform} targeting {audience}. 
                 This post should align with {compliance} rules and should be written using the information provided in the description below and nothing else. 
-                Ensure the tone of the post is {toneStyle}. Remove double quotes from the post.
+                Ensure the tone of the post is {toneStyle}.
                     
                 Document: {document}
-                    
-                Answer: To clarify, you need a post in {language} that is tailored for {audience} on {platform}.
-                This post should follow {compliance} rules. The content will be written in a {toneStyle} tone and will focus on the product's benefits 
-                and reasons for its use, offering a positive message about how the product can improve one's health. 
-                Please include any potential side effects or pertinent warnings. Conclude by encouraging the reader to consult their physician about the product.
-                The content will also align with the style conventions typical of {platform}. Avoid referencing instructions, copying content verbatim, or including quotations and titles in the drug ad. 
-                Do not solicit feedback. Provide only the generated drug ad text. Have I captured your requirements accurately?
-
-                Question: Yes, that's precisely what I'm looking for. Ensure the description should be limited to 150 words. Use only the information provided in the document for the ad's content.
-                Do not reference instructions, ask for feedback, include XML tags, or directly copy content. 
-                Exclude any quotations symbols, and provide only the text for the drug ad. 
                     
                 Answer: Here is your drug ad, tailored to {platform}'s style, in accordance with {compliance} rules:"""
                 
@@ -271,4 +234,3 @@ def complete(document, temperature, model_max_token, model_id):
     if model_id.startswith("anthropic"):
         return response_body.get('completion')
     return response_body['completions'][0]["data"]["text"].lstrip()
-
