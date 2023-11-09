@@ -6,6 +6,7 @@ This demo supports the following Amazon Bedrock foundational base LLM Models.
 
 - Anthropic - Claude V2
 - AI21 - Jurassic-2 Ultra
+- Amazon - Titan Large (Titan text G1 - Express)
 
 
 # Architecture
