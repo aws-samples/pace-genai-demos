@@ -4,7 +4,7 @@ Author: Jin Tan Ruan<br>
 Date: 04/11/2023<br>
 Disclaimer: This code is provided "as is" in accordance with the repository license<br>
 
-This demo showcases hwo to implement a RAG workflow with custom embeddings model and FAISS to create state-of-the-art Generative AI conversational experiences over enterprise content. The demo supports document types such as PDF, TXT, HTML, XML, JSON, RTF, PPT (Only text content), DOCX (Only text content).
+This demo showcases how to implement a RAG workflow with custom embeddings model and FAISS to create state-of-the-art Generative AI conversational experiences over enterprise content. The demo supports document types such as PDF, TXT, HTML, XML, JSON, RTF, PPT (Only text content), DOCX (Only text content).
 
 This demo supports the following Amazon Bedrock and SageMaker JumpStart foundational base LLM Models.
 
@@ -45,7 +45,7 @@ Run the following commands at the root of the repo
 
 After the deployment is successful, follow these steps to get started on using the Chatbot
 
-1. Create a Cognito user - Run the following code to create a user within the Cognito UserPool. Refer to the output section of Cloudformation stack named **guru-chatbot**
+1. Create a Cognito user - Run the following code to create a user within the Cognito UserPool. Refer to the output section of CloudFormation stack named **guru-chatbot**
    to get the value of the **CognitoUserPoolId** key. Be sure to replace the parameter values before running the commands.
 
 ```bash
@@ -53,7 +53,7 @@ After the deployment is successful, follow these steps to get started on using t
     ./create-new-user.sh USER_POOL_ID USERNAME PASSWORD
 ```
 
-2. Login to the App. You will find the App Cloudfront URL in the output section of Cloudformation stack named **guru-chatbot**.
+2. Login to the App. You will find the App CloudFront URL in the output section of CloudFormation stack named **guru-chatbot**.
 
 ![Embeddings Chatbot Default](./images/home.png)
 
