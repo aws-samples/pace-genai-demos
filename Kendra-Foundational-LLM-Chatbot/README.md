@@ -8,6 +8,8 @@ This demo supports the following Amazon Bedrock foundational base LLM Models.
 - AI21 - Jurassic-2 Ultra
 - Amazon - Titan Large (Titan text G1 - Express)
 
+### ℹ️ ***Ensure Amazon Bedrock is available in the AWS region you plan to deploy the solution in and that the LLM Model(s) is enabled.***
+
 
 # Architecture
 
