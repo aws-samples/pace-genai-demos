@@ -88,19 +88,20 @@ def lambda_handler(event, context):
         question_llm_model_args, document_llm_model_args = get_model_args(model_id, document_prompt)
         
         body = json.dumps(document_llm_model_args)
-        print(f"body={body}")
+        
         accept = "*/*"
         contentType = "application/json"
         print(f"modelId={modelId}")
         
 
-
+        
         content = bedrock.invoke_model(
             body=body, modelId=modelId, accept=accept, contentType=contentType
         )
         response = json.loads(content.get("body").read())
-        answer = response.get("completion")
-        print(answer)
+        
+        answer = get_llm_answer(model_id, response)
+        
 
         body = {
             "source_page": source_page_info if should_source_be_included(answer) else [],
@@ -132,6 +133,15 @@ def lambda_handler(event, context):
             }),
             "isBase64Encoded": False
         }
+        
+def get_llm_answer(model_id, response):
+    if model_id == "Amazon-Titan-Large":
+        return response.get('results')[0].get('outputText')
+    elif model_id == "Anthropic-Claude-V2":
+        return response.get("completion")
+    elif model_id == "AI21-Jurassic-2-Ultra":
+        return response['completions'][0]['data']['text']
+    
 
 def should_source_be_included(ans):
     
