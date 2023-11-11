@@ -17,7 +17,7 @@
     "@material-ui/icons": "^4.11.2",
     "ace-builds": "^1.13.0",
     "aws-amplify": "^5.0.12",
-    "axios": "^0.27.2",
+    "axios": "^1.6.0",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.42",
     "react": "^17.0.2",
