@@ -34,11 +34,11 @@ Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the
 
 ## Troubleshoot
 
-- **Unzipped size must be smaller than 262144000 bytes (Service: AWSLambdaInternal; Status Code: 400 **
+- **Unzipped size must be smaller than 262144000 bytes (Service: AWSLambdaInternal; Status Code: 400**
 
-- Delete the Existing Lambda Layer Folder: Begin by removing the lambda_langchain_layer folder from your project. This action ensures that any corrupted or oversized files are cleared.
-- Recreate the Layer: After deletion, recreate the lambda layer using the deploy.sh command. This process should generate a fresh, size-compliant layer with the necessary components.
-- Clean Docker Resources: It's also crucial to ensure that no residual Docker images or containers are occupying unnecessary space. Clean all running Docker images and containers to free up space and avoid any potential conflicts.
+1. Delete the Existing Lambda Layer Folder: Begin by removing the lambda_langchain_layer folder from your project. This action ensures that any corrupted or oversized files are cleared.
+2. Recreate the Layer: After deletion, recreate the lambda layer using the deploy.sh command. This process should generate a fresh, size-compliant layer with the necessary components.
+3. Clean Docker Resources: It's also crucial to ensure that no residual Docker images or containers are occupying unnecessary space. Clean all running Docker images and containers to free up space and avoid any potential conflicts.
 
 ## Reporting Bugs/Feature Requests
 
