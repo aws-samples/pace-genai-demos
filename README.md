@@ -42,8 +42,6 @@ Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the
 
 ## Reporting Bugs/Feature Requests
 
-We welcome you to use the GitHub issue tracker to report bugs or suggest features.
-
 When filing an issue, please check existing open, or recently closed, issues to make sure somebody else hasn't already
 reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
 
