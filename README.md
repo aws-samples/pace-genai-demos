@@ -40,7 +40,7 @@ Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the
 - Recreate the Layer: After deletion, recreate the lambda layer using the deploy.sh command. This process should generate a fresh, size-compliant layer with the necessary components.
 - Clean Docker Resources: It's also crucial to ensure that no residual Docker images or containers are occupying unnecessary space. Clean all running Docker images and containers to free up space and avoid any potential conflicts.
 
-  ## Reporting Bugs/Feature Requests
+## Reporting Bugs/Feature Requests
 
 We welcome you to use the GitHub issue tracker to report bugs or suggest features.
 
