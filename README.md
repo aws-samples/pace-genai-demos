@@ -32,6 +32,26 @@ Refer to the [blog](https://aws.amazon.com/blogs/machine-learning/harnessing-the
 - [Jin Tan Ruan - AWSI PACE Prototyping Developer](https://www.linkedin.com/in/ztanruan)
 - [Aravind Kodandaramaiah - AWSI PACE Senior Prototyping Developer](https://www.linkedin.com/in/aravindkoda)
 
+## Troubleshoot
+
+- **Unzipped size must be smaller than 262144000 bytes (Service: AWSLambdaInternal; Status Code: 400 **
+
+- Delete the Existing Lambda Layer Folder: Begin by removing the lambda_langchain_layer folder from your project. This action ensures that any corrupted or oversized files are cleared.
+- Recreate the Layer: After deletion, recreate the lambda layer using the deploy.sh command. This process should generate a fresh, size-compliant layer with the necessary components.
+- Clean Docker Resources: It's also crucial to ensure that no residual Docker images or containers are occupying unnecessary space. Clean all running Docker images and containers to free up space and avoid any potential conflicts.
+
+  ## Reporting Bugs/Feature Requests
+
+We welcome you to use the GitHub issue tracker to report bugs or suggest features.
+
+When filing an issue, please check existing open, or recently closed, issues to make sure somebody else hasn't already
+reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
+
+- A reproducible test case or series of steps
+- The version of our code being used
+- Any modifications you've made relevant to the bug
+- Anything unusual about your environment or deployment
+
 ## License
 
 This library is licensed under the MIT-0 License. See the LICENSE file.
