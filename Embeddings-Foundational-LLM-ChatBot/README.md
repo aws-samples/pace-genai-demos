@@ -74,7 +74,7 @@ After the deployment is successful, follow these steps to get started on using t
 2. Recreate the Layer: After deletion, recreate the lambda layer using the deploy.sh command. This process should generate a fresh, size-compliant layer with the necessary components.
 3. Clean Docker Resources: It's also crucial to ensure that no residual Docker images or containers are occupying unnecessary space. Clean all running Docker images and containers to free up space and avoid any potential conflicts.
 
-**Important Notice: Local Deployment Only
+**Important Notice: Recommend Local Deployment Only
 Do Not Use Cloud9 for Deployment**
 
 This demo is designed to be deployed locally and may not function correctly if deployed using Cloud9 or similar cloud-based development environments. To ensure full functionality and a smooth setup process, please follow the instructions above to deploy the demo locally on your own machine.
