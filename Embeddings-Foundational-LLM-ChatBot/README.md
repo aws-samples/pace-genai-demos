@@ -67,4 +67,16 @@ After the deployment is successful, follow these steps to get started on using t
 
 ## Troubleshoot
 
+
+**Unzipped size must be smaller than 262144000 bytes (Service: AWSLambdaInternal; Status Code: 400) - Cloud9** 
+
+1. Delete the Existing Lambda Layer Folder: Begin by removing the lambda_langchain_layer folder from your project. This action ensures that any corrupted or oversized files are cleared.
+2. Recreate the Layer: After deletion, recreate the lambda layer using the deploy.sh command. This process should generate a fresh, size-compliant layer with the necessary components.
+3. Clean Docker Resources: It's also crucial to ensure that no residual Docker images or containers are occupying unnecessary space. Clean all running Docker images and containers to free up space and avoid any potential conflicts.
+
+**Important Notice: Local Deployment Only
+Do Not Use Cloud9 for Deployment**
+
+This demo is designed to be deployed locally and may not function correctly if deployed using Cloud9 or similar cloud-based development environments. To ensure full functionality and a smooth setup process, please follow the instructions below to deploy the demo locally on your own machine.
+
 To ensure seamless processing, please refrain from uploading a new document until the current one has been fully processed. If you encounter issues with document handling, you may want to deploy the embedding model on a more robust instance such as ml.g5.12xlarge or ml.g5.24xlarge to improve performance. In the event of a document failure, attempt re-uploading the document before proceeding with further troubleshooting steps.
