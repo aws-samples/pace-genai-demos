@@ -77,6 +77,6 @@ After the deployment is successful, follow these steps to get started on using t
 **Important Notice: Local Deployment Only
 Do Not Use Cloud9 for Deployment**
 
-This demo is designed to be deployed locally and may not function correctly if deployed using Cloud9 or similar cloud-based development environments. To ensure full functionality and a smooth setup process, please follow the instructions below to deploy the demo locally on your own machine.
+This demo is designed to be deployed locally and may not function correctly if deployed using Cloud9 or similar cloud-based development environments. To ensure full functionality and a smooth setup process, please follow the instructions above to deploy the demo locally on your own machine.
 
 To ensure seamless processing, please refrain from uploading a new document until the current one has been fully processed. If you encounter issues with document handling, you may want to deploy the embedding model on a more robust instance such as ml.g5.12xlarge or ml.g5.24xlarge to improve performance. In the event of a document failure, attempt re-uploading the document before proceeding with further troubleshooting steps.
