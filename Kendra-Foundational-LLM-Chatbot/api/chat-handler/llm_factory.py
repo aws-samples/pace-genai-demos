@@ -43,6 +43,76 @@ def get_model_args(model_id, prompt):
             "temperature": 0.0, 
             "top_p": 0.9 
         }
+    
+    elif model_id == "Anthropic-Claude-V3-Sonnet":
+        question_llm_model_args = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        }
+
+        qa_llm_model_args = { 
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        }
+    
+    elif model_id == "Anthropic-Claude-V3-Haiku":
+        question_llm_model_args = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        }
+
+        qa_llm_model_args = { 
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        }
+        
+    elif model_id == "Anthropic-Claude-V3-Opus":
+        question_llm_model_args = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        }
+
+        qa_llm_model_args = { 
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 1024,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [{"type": "text", "text": prompt}],
+                }
+            ],
+        }
+        
     elif model_id == "AI21-Jurassic-2-Ultra":
         question_llm_model_args = { 
             "prompt": prompt,
@@ -79,6 +149,12 @@ def get_model_id(model_id):
         return "amazon.titan-text-express-v1"
     elif model_id == "Anthropic-Claude-V2":
         return "anthropic.claude-v2"
+    elif model_id == "Anthropic-Claude-V3-Sonnet":
+        return "anthropic.claude-3-sonnet-20240229-v1:0"
+    elif model_id == "Anthropic-Claude-V3-Haiku":
+        return "anthropic.claude-3-haiku-20240307-v1:0"
+    elif model_id == "Anthropic-Claude-V3-Opus":
+        return "anthropic.claude-3-opus-20240229-v1:0"
     elif model_id == "AI21-Jurassic-2-Ultra":
         return "ai21.j2-ultra-v1"
     else:

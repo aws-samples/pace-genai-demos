@@ -152,7 +152,7 @@ export function TopBarNavigation() {
           iconName: "script",
           onItemClick: (e) => onItemClickEventModel(e),
           items: [
-            {
+           {
               id: "AI21 Jurassic-2 Ultra",
               text: "AI21 Jurassic-2 Ultra"
                 
@@ -164,6 +164,18 @@ export function TopBarNavigation() {
             {
               id: "Amazon Titan Large",
               text: "Amazon Titan Large"
+            },
+            {
+              id: "Anthropic Claude V3 Sonnet",
+              text: "Anthropic Claude V3 Sonnet"
+            },
+            {
+              id: "Anthropic Claude V3 Haiku",
+              text: "Anthropic Claude V3 Haiku"
+            },
+            {
+              id: "Anthropic Claude V3 Opus",
+              text: "Anthropic Claude V3 Opus (Coming Soon)"
             }
           ].filter((item) => item.id !== selectedModel),
         },
