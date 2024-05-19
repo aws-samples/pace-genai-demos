@@ -59,8 +59,6 @@ After the deployment is successful, follow these steps to get started on using t
 
 3. You are all set. You are now able to interact with the ChatBot. You can choose the LLM models from the drop down menu. Choosing an LLM model will create a new Chat session.
 
-![Embeddings Chatbot Home](./images/chat.png)
-
 4. Select **Upload Document**. Click **Choose file** to select document. Click on **Upload** to transfer them into S3.
 
 ![Embeddings Chatbot Upload](./images/upload.png)
