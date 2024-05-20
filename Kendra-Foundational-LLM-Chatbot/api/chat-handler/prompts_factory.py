@@ -12,6 +12,12 @@ def get_prompts(model_id, question, context):
         return get_titan_document_prompt(question, context)
     elif model_id == "Anthropic-Claude-V2":
         return get_claude_document_prompt(question, context)
+    elif model_id == "Anthropic-Claude-V3-Sonnet":
+        return get_claude_document_prompt(question, context)
+    elif model_id == "Anthropic-Claude-V3-Haiku":
+        return get_claude_document_prompt(question, context)
+    elif model_id == "Anthropic-Claude-V3-Opus":
+        return get_claude_document_prompt(question, context)
     elif model_id == "AI21-Jurassic-2-Ultra":
         return get_jurassic_document_prompt(question, context)
     else:

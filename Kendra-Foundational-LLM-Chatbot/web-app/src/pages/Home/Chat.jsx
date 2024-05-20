@@ -78,6 +78,12 @@ export function Chat() {
       setModelId("Anthropic-Claude-V2");
     } else if (value === "Amazon Titan Large") {
       setModelId("Amazon-Titan-Large");
+    } else if (value === "Anthropic Claude V3 Sonnet") {
+      setModelId("Anthropic-Claude-V3-Sonnet");
+    } else if (value === "Anthropic Claude V3 Haiku") {
+      setModelId("Anthropic-Claude-V3-Haiku");
+    } else if (value === "Anthropic Claude V3 Opus") {
+      setModelId("Anthropic-Claude-V3-Opus");
     }
   }
 

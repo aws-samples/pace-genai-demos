@@ -96,13 +96,18 @@ def lambda_handler(event, context):
 
         
         content = bedrock.invoke_model(
-            body=body, modelId=modelId, accept=accept, contentType=contentType
-        )
+            modelId=modelId, body=body, accept=accept, contentType=contentType
+            )
+
         response = json.loads(content.get("body").read())
+        print(response)
         
         answer = get_llm_answer(model_id, response)
         
-
+        #Anthropic Claude V3 response comes back as python list, not a string, so need to convert in order to be compatible with the UI
+        if not isinstance(answer, str):
+            answer = '.'.join(str(x) for x in answer)
+        
         body = {
             "source_page": source_page_info if should_source_be_included(answer) else [],
             "answer": answer,
@@ -139,10 +144,15 @@ def get_llm_answer(model_id, response):
         return response.get('results')[0].get('outputText')
     elif model_id == "Anthropic-Claude-V2":
         return response.get("completion")
+    elif model_id == "Anthropic-Claude-V3-Sonnet":
+        return response.get("content")[0].get('text')
+    elif model_id == "Anthropic-Claude-V3-Haiku":
+        return response.get("content")[0].get('text')
+    elif model_id == "Anthropic-Claude-V3-Opus":
+        return response.get("content")[0].get('text')
     elif model_id == "AI21-Jurassic-2-Ultra":
         return response['completions'][0]['data']['text']
     
-
 def should_source_be_included(ans):
     
     include = True
@@ -158,6 +168,7 @@ def should_source_be_included(ans):
         return False
         
     return include
+     
 
 def get_relevant_doc_names(relevant_documents):
     sources = []
@@ -176,6 +187,7 @@ def get_relevant_doc_names(relevant_documents):
         most_relevant_docs = most_relevant_docs[:int(NO_OF_SOURCES_TO_LIST)]
         for doc_path in most_relevant_docs:
             doc_names.append( { "file_name": get_source_file_name(doc_path), "file": get_presigned_url(doc_path) })
+            #Use this if the Kendra index uses a webcrawler instead of docs on S3 -->  doc_names.append( { "file_name": get_source_file_name(doc_path), "file": doc_path })
 
     return doc_names
 
