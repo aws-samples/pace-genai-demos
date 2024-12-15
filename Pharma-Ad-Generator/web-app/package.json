@@ -12,7 +12,7 @@
     "@cloudscape-design/global-styles": "^1.0.1",
     "@aws-amplify/ui-react": "^4.3.6",
     "styled-components": "^6.0.8",
-    "aws-amplify": "^5.0.12",
+    "aws-amplify": "^5.3.12",
     "moment": "^2.29.4",
     "aws-sdk": "^2.1480.0",
     "moment-timezone": "^0.5.42",
